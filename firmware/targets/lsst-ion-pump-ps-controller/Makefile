@@ -19,7 +19,7 @@ target: prom
 
 # Define target part
 # Edit this for each target
-export PRJ_PART = XC7A100TSBG484-1
+export PRJ_PART = xc7a100tfgg484-3
 
 # Use top level makefile
 include ../../submodules/ruckus/system_vivado.mk
