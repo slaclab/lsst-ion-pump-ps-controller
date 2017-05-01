@@ -1,6 +1,7 @@
 # Load RUCKUS environment and library
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-# Load ruckus files
-# Place an entry here for each common module
-#loadRuckusTcl "$::DIR_PATH/module1"
+# Load Source Code
+loadSource -dir  "$::DIR_PATH/rtl/"
+loadSource -path "$::DIR_PATH/ip/AxiXadcCore.dcp"
+#loadIpCore  -path "$::DIR_PATH/ip/AxiXadcCore.xci" 
