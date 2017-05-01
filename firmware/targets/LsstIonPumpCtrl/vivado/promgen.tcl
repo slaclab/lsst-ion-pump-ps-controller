@@ -10,5 +10,6 @@
 
 # SPI PROM
 set format     "mcs"
-set inteface   "spix4"
+set inteface   "spix1"
 set size       "256"
+
