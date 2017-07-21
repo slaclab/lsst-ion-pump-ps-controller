@@ -1,11 +1,25 @@
+-----------------------------------------------------------------
+--                                                             --
+-----------------------------------------------------------------
+--
+--      Max11202Master.vhd - 
+--
+--      Copyright(c) SLAC National Accelerator Laboratory 2000
+--
+--      Author: Jeff Olsen
+--      Created on: 7/18/2017 3:10:01 PM
+--      Last change: JO 7/18/2017 3:59:45 PM
+--
 -------------------------------------------------------------------------------
 -- Title      : 
 -------------------------------------------------------------------------------
+-- Max11202Master.vhd
+-- From
 -- File       : SpiMaster.vhd
 -- Author     : Larry Ruckman  <ruckman@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2013-05-24
--- Last update: 2016-12-06
+-- Last update: 2017-07-18
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -25,185 +39,143 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
-use ieee.math_real.all;
+--use ieee.math_real.all;
 use work.StdRtlPkg.all;
 
-entity SpiMaster is
-   generic (
-      TPD_G             : time                  := 1 ns;
-      NUM_CHIPS_G       : positive range 1 to 8 := 4;
-      DATA_SIZE_G       : natural               := 16;
-      CPHA_G            : sl                    := '0';
-      CPOL_G            : sl                    := '0';
-      CLK_PERIOD_G      : real                  := 8.0E-9;
-      SPI_SCLK_PERIOD_G : real                  := 1.0E-6);  -- 1 MHz
-   port (
-      --Global Signals
-      clk     : in  sl;
-      sRst    : in  sl;
-      -- Parallel interface
-      chipSel : in  slv(log2(NUM_CHIPS_G)-1 downto 0);
-      wrEn    : in  sl;
-      wrData  : in  slv(DATA_SIZE_G-1 downto 0);
-      dataSize : in slv(log2(DATA_SIZE_G)-1 downto 0) := toSlv(DATA_SIZE_G-1, log2(DATA_SIZE_G));
-      rdEn    : out sl;
-      rdData  : out slv(DATA_SIZE_G-1 downto 0);
-      shiftCount : out slv(bitSize(DATA_SIZE_G)-1 downto 0);
-      --SPI interface
-      spiCsL  : out slv(NUM_CHIPS_G-1 downto 0);
-      spiSclk : out sl;
-      spiSdi  : out sl;
-      spiSdo  : in  sl);                
-end SpiMaster;
+entity max11202Master is
+  generic (
+    TPD_G                : time := 1 ns;
+    CLK_PERIOD_G         : real := 8.0E-9;
+    SERIAL_SCLK_PERIOD_G : real := 1.0E-6);  -- 1 MHz
+  port (
+    --Global Signals
+    clk    : in  sl;
+    sRst   : in  sl;
+    -- Parallel interface
+    wrEn   : in  sl;
+    rdEn   : out sl;
+    rdAddr : in  slv(1 downto 0);
+    rdData : out slv(31 downto 0);
+    Sclk   : out sl;
+    Sdin    : in slv(2 downto 0)
+    );
+end max11202Master;
 
-architecture rtl of SpiMaster is
+architecture rtl of max11202Master is
 
-   constant SPI_CLK_PERIOD_DIV2_CYCLES_C : integer := integer(SPI_SCLK_PERIOD_G / (2.0*CLK_PERIOD_G));
-   constant SCLK_COUNTER_SIZE_C          : integer := bitSize(SPI_CLK_PERIOD_DIV2_CYCLES_C);
+  constant SERIAL_CLK_PERIOD_DIV2_CYCLES_C : integer := integer(SERIAL_SCLK_PERIOD_G / (2.0*CLK_PERIOD_G));
+  constant SCLK_COUNTER_SIZE_C             : integer := bitSize(SERIAL_CLK_PERIOD_DIV2_CYCLES_C);
 
 
-   -- Types
-   type StateType is (
-      IDLE_S,
-      SHIFT_S,
-      SAMPLE_S,
-      DONE_S);
+  -- Types
+  type data32 is array ( 1 downto 0) of slv(31 downto 0);
 
-   type RegType is record
-      state       : StateType;
-      rdEn        : sl;
-      rdData      : slv(DATA_SIZE_G-1 downto 0);
-      wrData      : slv(DATA_SIZE_G-1 downto 0);
-      dataCounter : slv(bitSize(DATA_SIZE_G)-1 downto 0);
-      sclkCounter : slv(SCLK_COUNTER_SIZE_C-1 downto 0);
+  type StateType is (
+    IDLE_S,
+    SHIFT_S,
+    SAMPLE_S,
+    DONE_S);
 
-      spiCsL  : slv(NUM_CHIPS_G-1 downto 0);
-      spiSclk : sl;
-      spiSdi  : sl;
-   end record RegType;
+  type RegType is record
+    state       : StateType;
+    rdEn        : sl;
+    rdData      : data32(2 downto 0);
+    dataCounter : slv(25 downto 0);
+    sclkCounter : slv(SCLK_COUNTER_SIZE_C-1 downto 0);
+    Sclk        : sl;
+  end record RegType;
 
-   constant REG_INIT_C : RegType := (
-      state       => IDLE_S,
-      rdEn        => '0',
-      rdData      => (others => '0'),
-      wrData      => (others => '0'),
-      dataCounter => (others => '0'),
-      sclkCounter => (others => '0'),
-      spiCsL      => (others => '1'),
-      spiSclk     => '0',
-      spiSdi      => '0');
+  constant REG_INIT_C : RegType := (
+    state       => IDLE_S,
+    rdEn        => '0',
+    rdData      => (others => x"00000000"),
+    dataCounter => (others => '0'),
+    sclkCounter => (others => '0'),
+    Sclk        => '0'
+);
 
-   signal r   : RegType := REG_INIT_C;
-   signal rin : RegType;
-
-   signal spiSdoRes : sl;
+  signal r   : RegType := REG_INIT_C;
+  signal rin : RegType;
 
 begin
 
-   spiSdoRes <= to_x01z(spiSdo);
+  comb : process (r, sRst, wrEn) is
+    variable v : RegType;
+  begin
+    v := r;
 
-   comb : process (chipSel, dataSize, r, sRst, spiSdoRes, wrData, wrEn) is
-      variable v : RegType;
-   begin
-      v := r;
+    case (r.state) is
+      when IDLE_S =>
 
-      case (r.state) is
-         when IDLE_S =>
+        v.Sclk        := '0';
+        v.dataCounter := (others => '0');
+        v.sclkCounter := (others => '0');
+        v.rdEn        := '1';  -- rdEn always valid between txns, indicates ready for next txn
 
-            v.spiSclk     := CPOL_G;
-            v.spiSdi      := '0';
-            v.dataCounter := (others => '0');
-            v.sclkCounter := (others => '0');
-            v.rdEn        := '1';  -- rdEn always valid between txns, indicates ready for next txn
+        if (wrEn = '1') then
+          v.rdEn   := '0';
 
-            if (wrEn = '1') then
-               v.rdEn   := '0';
-               v.wrData := wrData;
-               v.rdData := (others => '0');
-               v.spiCsL := not (decode(chipSel)(NUM_CHIPS_G-1 downto 0));
+          if (Sdin = "000") then        -- All ADCs are ready
+            v.state := SAMPLE_S;
+          end if;
+        end if;
 
-               if (CPHA_G = '0') then
-                  -- Sample on first sclk edge so shift here before that happens
-                  v.spiSdi := wrData(DATA_SIZE_G-1);
-                  v.wrData := wrData(DATA_SIZE_G-2 downto 0) & '0';
-                  v.state  := SAMPLE_S;
-               else
-                  v.state := SHIFT_S;
-               end if;
-            end if;
+      when SHIFT_S =>
+        -- Wait half a clock period then shift out the next data bit
+        v.sclkCounter := r.sclkCounter + 1;
+        if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
+          v.sclkCounter := (others => '0');
+          v.Sclk     := not r.Sclk;
+        end if;
 
-         when SHIFT_S =>
-            -- Wait half a clock period then shift out the next data bit
-            v.sclkCounter := r.sclkCounter + 1;
-            if (r.sclkCounter = SPI_CLK_PERIOD_DIV2_CYCLES_C) then
-               v.sclkCounter := (others => '0');
-               v.spiSclk     := not r.spiSclk;
-               v.spiSdi      := r.wrData(DATA_SIZE_G-1);
-               v.wrData      := r.wrData(DATA_SIZE_G-2 downto 0) & '0';
-               v.state       := SAMPLE_S;
 
-               if (CPHA_G = '0') then
-                  v.dataCounter := r.dataCounter + 1;
-                  if (r.dataCounter = dataSize) then
-                     v.state := DONE_S;
-                  end if;
-               end if;
-            end if;
+      when SAMPLE_S =>
+        -- Wait half a clock period then sample the next data bit
+        v.sclkCounter := r.sclkCounter + 1;
+        if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
+          v.sclkCounter := (others => '0');
+          v.Sclk        := not r.Sclk;
+          v.rdData(0)   := r.rdData(0)(30 downto 0) & SDin(0);
+          v.rdData(1)   := r.rdData(1)(30 downto 0) & SDin(1);
+          v.rdData(2)   := r.rdData(2)(30 downto 0) & SDin(2);
+          v.state       := SHIFT_S;
 
-         when SAMPLE_S =>
-            -- Wait half a clock period then sample the next data bit
-            v.sclkCounter := r.sclkCounter + 1;
-            if (r.sclkCounter = SPI_CLK_PERIOD_DIV2_CYCLES_C) then
-               v.sclkCounter := (others => '0');
-               v.spiSclk     := not r.spiSclk;
-               v.rdData      := r.rdData(DATA_SIZE_G-2 downto 0) & spiSdoRes;
-               v.state       := SHIFT_S;
+          v.dataCounter := r.dataCounter + 1;
+          if (r.dataCounter = 24) then
+            v.state := DONE_S;
+          end if;
+        end if;
 
-               if (CPHA_G = '1') then
-                  v.dataCounter := r.dataCounter + 1;
-                  if (r.dataCounter = dataSize) then
-                     v.state := DONE_S;
-                  end if;
-               end if;
-            end if;
-            
-         when DONE_S =>
-            -- Assert rdEn after half a SPI clk period
-            -- Go back to idle after one SPI clk period
-            -- Otherwise back to back operations happen too fast.
-            v.sclkCounter := r.sclkCounter + 1;
-            if (r.sclkCounter = SPI_CLK_PERIOD_DIV2_CYCLES_C) then
-               v.sclkCounter := (others => '0');
-               v.spiCsL      := (others => '1');
+    when DONE_S =>
+    -- Assert rdEn after half a SPI clk period
+    -- Go back to idle after one SPI clk period
+    -- Otherwise back to back operations happen too fast.
+    v.sclkCounter := r.sclkCounter + 1;
+    if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
+      v.sclkCounter := (others => '0');
+      v.state       := IDLE_S;
+    end if;
+    when others => null;
+  end case;
 
-               if (r.spiCsL = slvOne(NUM_CHIPS_G)) then
-                  v.state := IDLE_S;
-               end if;
-            end if;
-         when others => null;
-      end case;
+  if (sRst = '1') then
+    v := REG_INIT_C;
+  end if;
 
-      if (sRst = '1') then
-         v := REG_INIT_C;
-      end if;
+  rin <= v;
 
-      rin <= v;
+  Sclk <= r.Sclk;
 
-      spiSclk <= r.spiSclk;
-      spiSdi  <= r.spiSdi;
-      spiCsL  <= r.spiCsL;
+  rdEn  <= r.rdEn;
+  rddata <= r.rddata(conv_integer(rdAddr));
 
-      rdEn   <= r.rdEn;
-      rdData <= r.rdData;
-      shiftCount <= r.dataCounter;
-      
-   end process comb;
+end process comb;
 
-   seq : process (clk) is
-   begin
-      if (rising_edge(clk)) then
-         r <= rin after TPD_G;
-      end if;
-   end process seq;
+seq : process (clk) is
+begin
+  if (rising_edge(clk)) then
+    r <= rin after TPD_G;
+  end if;
+end process seq;
 
 end rtl;

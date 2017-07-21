@@ -93,7 +93,7 @@ architecture Behavioral of IonPumpApp is
   constant REG_INDEX_C : natural := 0;
 
 constant ADC_INDEX_C : natural := 1;
-constant DAC_INDEX_C : natural := DAC_INDEX_C + 6;
+constant DAC_INDEX_C : natural := ADC_INDEX_C + 6;
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     REG_INDEX_C    => (

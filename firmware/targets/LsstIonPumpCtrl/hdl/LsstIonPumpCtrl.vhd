@@ -1,3 +1,15 @@
+-----------------------------------------------------------------
+--                                                             --
+-----------------------------------------------------------------
+--
+--	LsstIonPumpCtrl.vhd - 
+--
+--	Copyright(c) SLAC National Accelerator Laboratory 2000
+--
+--	Author: Jeff Olsen
+--	Created on: 7/19/2017 1:33:09 PM
+--	Last change: JO  7/19/2017 1:33:09 PM
+--
 -------------------------------------------------------------------------------
 -- File       : LsstIonPumpCtrl.vhd
 -- Company    : SLAC National Accelerator Laboratory
