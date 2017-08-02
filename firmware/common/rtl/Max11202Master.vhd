@@ -19,7 +19,7 @@
 -- Author     : Larry Ruckman  <ruckman@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2013-05-24
--- Last update: 2017-07-18
+-- Last update: 2017-08-02
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -50,14 +50,14 @@ entity max11202Master is
   port (
     --Global Signals
     clk    : in  sl;
-    Rst   : in  sl;
+    Rst    : in  sl;
     -- Parallel interface
     wrEn   : in  sl;
     rdEn   : out sl;
     rdAddr : in  slv(1 downto 0);
     rdData : out slv(31 downto 0);
     Sclk   : out sl;
-    Sdin    : in slv(2 downto 0)
+    Sdin   : in  slv(2 downto 0)
     );
 end max11202Master;
 
@@ -68,7 +68,7 @@ architecture rtl of max11202Master is
 
 
   -- Types
-  type data32 is array ( 2 downto 0) of slv(31 downto 0);
+  type data32 is array (2 downto 0) of slv(31 downto 0);
 
   type StateType is (
     IDLE_S,
@@ -92,7 +92,7 @@ architecture rtl of max11202Master is
     dataCounter => (others => '0'),
     sclkCounter => (others => '0'),
     Sclk        => '0'
-);
+    );
 
   signal r   : RegType := REG_INIT_C;
   signal rin : RegType;
@@ -113,7 +113,7 @@ begin
         v.rdEn        := '1';  -- rdEn always valid between txns, indicates ready for next txn
 
         if (wrEn = '1') then
-          v.rdEn   := '0';
+          v.rdEn := '0';
 
           if (Sdin = "000") then        -- All ADCs are ready
             v.state := SAMPLE_S;
@@ -125,7 +125,7 @@ begin
         v.sclkCounter := r.sclkCounter + 1;
         if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
           v.sclkCounter := (others => '0');
-          v.Sclk     := not r.Sclk;
+          v.Sclk        := not r.Sclk;
         end if;
 
 
@@ -146,36 +146,36 @@ begin
           end if;
         end if;
 
-    when DONE_S =>
-    -- Assert rdEn after half a SPI clk period
-    -- Go back to idle after one SPI clk period
-    -- Otherwise back to back operations happen too fast.
-    v.sclkCounter := r.sclkCounter + 1;
-    if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
-      v.sclkCounter := (others => '0');
-      v.state       := IDLE_S;
+      when DONE_S =>
+        -- Assert rdEn after half a SPI clk period
+        -- Go back to idle after one SPI clk period
+        -- Otherwise back to back operations happen too fast.
+        v.sclkCounter := r.sclkCounter + 1;
+        if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
+          v.sclkCounter := (others => '0');
+          v.state       := IDLE_S;
+        end if;
+      when others => null;
+    end case;
+
+    if (Rst = '1') then
+      v := REG_INIT_C;
     end if;
-    when others => null;
-  end case;
 
-  if (Rst = '1') then
-    v := REG_INIT_C;
-  end if;
+    rin <= v;
 
-  rin <= v;
+    Sclk <= r.Sclk;
 
-  Sclk <= r.Sclk;
+    rdEn   <= r.rdEn;
+    rddata <= r.rddata(conv_integer(rdAddr));
 
-  rdEn  <= r.rdEn;
-  rddata <= r.rddata(conv_integer(rdAddr));
+  end process comb;
 
-end process comb;
-
-seq : process (clk) is
-begin
-  if (rising_edge(clk)) then
-    r <= rin after TPD_G;
-  end if;
-end process seq;
+  seq : process (clk) is
+  begin
+    if (rising_edge(clk)) then
+      r <= rin after TPD_G;
+    end if;
+  end process seq;
 
 end rtl;

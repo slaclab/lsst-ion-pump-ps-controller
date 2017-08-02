@@ -19,7 +19,7 @@
 --            : Uros Legat Modified <ulegat@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-01-12
--- Last update: 2017-07-18
+-- Last update: 2017-08-02
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -171,12 +171,12 @@ begin
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
       clk    => axiClk,
-      Rst   => axiRst,
+      Rst    => axiRst,
       wrEn   => r.wrEn,
       rdEn   => rdEn,
       rdAddr => axiReadMaster.araddr(1 downto 0),
       rdData => rdData,
       Sclk   => coreSclk,
-      Sdin    => coreSDin
+      Sdin   => coreSDin
       );
 end architecture rtl;
