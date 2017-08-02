@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 3:10:01 PM
---      Last change: JO 8/1/2017 2:20:35 PM
+--      Last change: JO 8/2/2017 12:09:33 PM
 --
 -------------------------------------------------------------------------------
 -- Title      : 
@@ -68,7 +68,7 @@ architecture rtl of max11202Master is
 
 
   -- Types
-  type data32 is array ( 1 downto 0) of slv(31 downto 0);
+  type data32 is array ( 2 downto 0) of slv(31 downto 0);
 
   type StateType is (
     IDLE_S,
@@ -79,7 +79,7 @@ architecture rtl of max11202Master is
   type RegType is record
     state       : StateType;
     rdEn        : sl;
-    rdData      : data32(2 downto 0);
+    rdData      : data32;
     dataCounter : slv(25 downto 0);
     sclkCounter : slv(SCLK_COUNTER_SIZE_C-1 downto 0);
     Sclk        : sl;
@@ -99,7 +99,7 @@ architecture rtl of max11202Master is
 
 begin
 
-  comb : process (r, sRst, wrEn) is
+  comb : process (r, Rst, wrEn, sdin, rdAddr) is
     variable v : RegType;
   begin
     v := r;

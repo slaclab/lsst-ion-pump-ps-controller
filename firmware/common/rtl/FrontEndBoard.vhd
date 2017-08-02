@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 8/1/2017 2:28:15 PM
+--      Last change: JO 8/2/2017 12:23:02 PM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -46,8 +46,8 @@ entity FrontEndBoard is
   port (
 
 -- Slave AXI-Lite Interface
-    axiLiteClk     : in  sl;
-    axiLiteRst     : in  sl;
+    axilClk     : in  sl;
+    axilRst     : in  sl;
     axiReadMaster  : in  AxiLiteReadMasterType;
     axiReadSlave   : out AxiLiteReadSlaveType;
     axiWriteMaster : in  AxiLiteWriteMasterType;
@@ -63,9 +63,9 @@ entity FrontEndBoard is
 -- Ion Pump Control Board ADC SPI Interfaces
     dacDout  : out sl;                  -- Serial out for Setpoint DACs
     dacSclk  : out sl;                  -- Clock for the Setpoint DACs
-    iProgCsN : out sl;                  -- Chip Enable for Current DAC
-    vProgCsN : out sl;                  -- Chip Enable for Voltage DAC
-    pProgCsN : out sl;                  -- Chip Enable for Power DAC
+    iProgCsL : out sl;                  -- Chip Enable for Current DAC
+    vProgCsL : out sl;                  -- Chip Enable for Voltage DAC
+    pProgCsL : out sl;                  -- Chip Enable for Power DAC
 
 -- Ion Pump Control Board Mode bits
     iMode : in sl;                      -- HVPS in Current Limit Mode
@@ -101,31 +101,31 @@ architecture Behavioral of FrontEndBoard is
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     REG_INDEX_C    => (
-      baseAddr     => X"00",
+      baseAddr     => X"00000000",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+0  => (
-      baseAddr     => x"01",
+      baseAddr     => x"00000001",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+1  => (
-      baseAddr     => x"02",
+      baseAddr     => x"00000002",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+2  => (
-      baseAddr     => x"03",
+      baseAddr     => x"00000003",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+0  => (
-      baseAddr     => x"04",
+      baseAddr     => x"00000004",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+1  => (
-      baseAddr     => x"05",
+      baseAddr     => x"00000005",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+2  => (
-      baseAddr     => x"06",
+      baseAddr     => x"00000006",
       addrBits     => 4,
       connectivity => X"0001")
     );
@@ -134,12 +134,15 @@ architecture Behavioral of FrontEndBoard is
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadMasters  : AxiLiteReadMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
+	signal iadcSclk : slv(2 downto 0);
 
 begin
 
-  iProgCsN <= iCsb(0);
-  vProgCsN <= iCsb(1);
-  pProgCsN <= iCsb(2);
+  iProgCsL <= iCsb(0);
+  vProgCsL <= iCsb(1);
+  pProgCsL <= iCsb(2);
+
+  adcSclk <= iadcSclk(0);
 
   dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
   begin
@@ -184,8 +187,8 @@ begin
       AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
       )
     port map (
-      axilClk => axiLiteClk,
-      axilRst => axiLiteRst,
+      axilClk => axilClk,
+      axilRst => axilRst,
  
 
       axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
@@ -214,8 +217,8 @@ begin
           SPI_SCLK_PERIOD_G => 1.0E-6
           )
         port map (
-          axiClk => axiLiteClk,
-          axiRst => axiLiteRst,
+          axiClk => axilClk,
+          axiRst => axilRst,
 
           axiReadMaster  => locAxilReadMasters(DAC_INDEX_C+I),
           axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C+I),
@@ -238,15 +241,15 @@ begin
     SERIAL_SCLK_PERIOD_G => 1.0E-6
           )
          port map (
-    axiClk => axiLiteClk,
-    axiRst => axiLiteRst,
+    axiClk => axilClk,
+    axiRst => axilRst,
 
     axiReadMaster  => locAxilReadMasters(ADC_INDEX_C+I),
     axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C+I),
     axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C+I),
     axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C+I),
 
-    coreSclk => adcSClk,
+    coreSclk => iadcSClk(I),
     coreSDin => adcIn
 
             );

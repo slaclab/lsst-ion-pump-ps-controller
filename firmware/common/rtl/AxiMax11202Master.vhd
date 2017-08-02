@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 7/18/2017 4:09:22 PM
+--      Last change: JO 8/2/2017 9:12:15 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
@@ -102,7 +102,6 @@ architecture rtl of AxiMax11202Master is
     state         => WAIT_AXI_TXN_S,
     axiReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
     axiWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C,
-    wrData        => (others => '0'),
     wrEn          => '0');
 
   signal r   : RegType := REG_INIT_C;
@@ -133,7 +132,7 @@ begin
       when WAIT_CYCLE_S =>
         -- Wait 1 cycle for rdEn to drop
         v.wrEn  := '0';
-        v.state := WAIT_SPI_TXN_DONE_S;
+        v.state := WAIT_SERIAL_TXN_DONE_S;
 
       when WAIT_SERIAL_TXN_DONE_S =>
 
@@ -172,12 +171,12 @@ begin
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
       clk    => axiClk,
-      sRst   => axiRst,
+      Rst   => axiRst,
       wrEn   => r.wrEn,
       rdEn   => rdEn,
       rdAddr => axiReadMaster.araddr(1 downto 0),
       rdData => rdData,
       Sclk   => coreSclk,
-      Sdi    => coreSDin
+      Sdin    => coreSDin
       );
 end architecture rtl;

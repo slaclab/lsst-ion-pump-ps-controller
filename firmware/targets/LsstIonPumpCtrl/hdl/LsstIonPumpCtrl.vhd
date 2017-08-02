@@ -8,7 +8,7 @@
 --
 --	Author: Jeff Olsen
 --	Created on: 7/19/2017 1:33:09 PM
---	Last change: JO  7/19/2017 1:33:09 PM
+--	Last change: JO 8/2/2017 9:40:28 AM
 --
 -------------------------------------------------------------------------------
 -- File       : LsstIonPumpCtrl.vhd
@@ -53,9 +53,9 @@ entity LsstIonPumpCtrl is
       -- Ion Pump Control Board ADC SPI Interfaces
       dacDout  : out   slv(5 downto 0);  -- Serial out for Setpoint DACs
       dacSclk  : out   slv(5 downto 0);  -- Clock for the Setpoint DACs
-      iProgCsL : out   sl;              -- Chip Enable for Current DAC
-      vProgCsL : out   sl;              -- Chip Enable for Voltage DAC
-      pProgCsL : out   sl;              -- Chip Enable for Power DAC
+      iProgCsL : out   slv(5 downto 0);              -- Chip Enable for Current DAC
+      vProgCsL : out   slv(5 downto 0);              -- Chip Enable for Voltage DAC
+      pProgCsL : out   slv(5 downto 0);              -- Chip Enable for Power DAC
       -- Ion Pump Control Board Mode bits
       iMode    : in    slv(5 downto 0);  -- HVPS in Current Limit Mode
       vMode    : in    slv(5 downto 0);  -- HVPS in Voltage Limit Mode
@@ -85,7 +85,7 @@ end LsstIonPumpCtrl;
 
 architecture top_level of LsstIonPumpCtrl is
 
-   constant SYS_CLK_FREQ_C   : real := 125.0E+6;
+   constant SYS_CLK_FREQ_C   : real := 156.0E+6;
 
    constant NUM_AXI_MASTERS_C : natural := 5;
 
@@ -314,7 +314,7 @@ begin
       generic map (
          TPD_G            => TPD_G,
          AXI_CLK_FREQ_C   => SYS_CLK_FREQ_C,
-         AXI_BASE_ADDR_G  => AXI_CONFIG_C(ION_CONTROL_INDEX_C).baseAddr,
+--         AXI_BASE_ADDR_G  => AXI_CONFIG_C(ION_CONTROL_INDEX_C).baseAddr,
          AXI_ERROR_RESP_G => AXI_ERROR_RESP_G)
       port map (
          -- AXI-Lite Interface
