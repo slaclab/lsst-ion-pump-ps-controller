@@ -10,20 +10,29 @@
 --      Created on: 7/25/2017 1:03:24 PM
 --      Last change: JO 7/25/2017 2:57:13 PM
 --
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+use work.StdRtlPkg.all;
+
+use work.AxiLitePkg.all;
+
 entity FrontEndReg is
   generic (
-    TPD_G            : TPD_G,
-    AXI_ERROR_RESP_G : AXI_ERROR_RESP_G
+    TPD_G            : time := 1 ns;
+    AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C
     );
   port (
 
 -- Slave AXI-Lite Interface
-    axiLiteClk     : in  sl;
-    axiLiteRst     : in  sl;
-    axiReadMaster  : in  AxiLiteReadMasterType;
-    axiReadSlave   : out AxiLiteReadSlaveType;
-    axiWriteMaster : in  AxiLiteWriteMasterType;
-    axiWriteSlave  : out AxiLiteWriteSlaveType;
+    axilClk     : in  sl;
+    axilRst     : in  sl;
+    axilReadMaster  : in  AxiLiteReadMasterType;
+    axilReadSlave   : out AxiLiteReadSlaveType;
+    axilWriteMaster : in  AxiLiteWriteMasterType;
+    axilWriteSlave  : out AxiLiteWriteSlaveType;
 
 
 -- Ion Pump Control Board Mode bits
@@ -42,12 +51,16 @@ architecture Behavioral of FrontEndReg is
 
   type RegType is record
     modeBits  : slv(2 downto 0);
-    enableBit : sl
-  end record RegType;
+    enableBit : sl;
+    axilReadSlave : AxiLiteReadSlaveType;
+    axilWriteSlave : AxiLiteWriteSlaveType;
+  end record;
 
   constant REG_INIT_C : RegType := (
-    modeBits                    <= "000";
-    enableBit                   <= '0'
+    modeBits                    => "000",
+    enableBit                   => '0',
+    axilReadSlave => AXI_LITE_READ_SLAVE_INIT_C,
+    axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C
     );
 
   signal r   : RegType := REG_INIT_C;
@@ -72,7 +85,7 @@ begin
 
     axiSlaveDefault(axilEp, v.axilWriteSlave, v.axilReadSlave);
 
-    if (axiLiteRst = '1') then
+    if (axilRst = '1') then
       v := REG_INIT_C;
     end if;
 
@@ -80,9 +93,9 @@ begin
 
   end process;
 
-  seq : process (axiLiteClk) is
+  seq : process (axilClk) is
   begin
-    if (rising_edge(axiLiteClk) then
+    if (rising_edge(axilClk)) then
       r <= rin after TPD_G;
     end if;
   end process seq;

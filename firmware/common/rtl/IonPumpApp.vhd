@@ -39,9 +39,9 @@ use work.AxiLitePkg.all;
  
  entity IonPumpApp is
     generic (
-      TPD_G            : TPD_G,
-      AXIL_BASE_ADDR_G : AXI_CONFIG_C(ION_CONTROL_INDEX_C).baseAddr,
-      AXI_ERROR_RESP_G : AXI_ERROR_RESP_G
+      TPD_G            : time := 1ns;
+    AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C
+
       );
     port (
 
@@ -55,10 +55,10 @@ use work.AxiLitePkg.all;
 	
 -- Controller IO
 -- Ion Pump Control Board ADC SPI Interfaces
-      I_Mon_Din : in slv(5 downto 0);            -- Serial in from Current Mon ADC
-      V_Mon_Din : in slv(5 downto 0);             -- Serial in from Voltage Mon ADC
-      P_Mon_Din : in slv(5 downto 0);             -- Serial in from Power Mon ADC
-      ADC_SClk  : in slv(5 downto 0);             -- Clock for Monitor ADCs
+      iMonDin : in slv(5 downto 0);            -- Serial in from Current Mon ADC
+      vMonDin : in slv(5 downto 0);             -- Serial in from Voltage Mon ADC
+      pMonDin : in slv(5 downto 0);             -- Serial in from Power Mon ADC
+      adcSClk  : out slv(5 downto 0);             -- Clock for Monitor ADCs
 
 -- Ion Pump Control Board ADC SPI Interfaces
       dacDout  : out  slv(5 downto 0);              -- Serial out for Setpoint DACs
@@ -89,73 +89,40 @@ architecture Behavioral of IonPumpApp is
   -- AXI Lite Config and Signals
   -------------------------------------------------------------------------------------------------
 
-  constant NUM_AXI_MASTERS_C : natural := 13;
-  constant REG_INDEX_C : natural := 0;
+    constant BOARD_INDEX_C : natural := 0;
 
-constant ADC_INDEX_C : natural := 1;
-constant DAC_INDEX_C : natural := ADC_INDEX_C + 6;
+  constant NUM_AXI_MASTERS_C : natural := 6;
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
-    REG_INDEX_C    => (
-      baseAddr           => REG_INDEX_C + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C    => (
+      baseAddr           => x"0000",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C    => (
-      baseAddr           => DAC_INDEX_C + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C    => (
+      baseAddr           => x"0100",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C+1    => (
-      baseAddr           => DAC_INDEX_C+1 + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C+1    => (
+      baseAddr           =>x"0200",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C+2    => (
-      baseAddr           => DAC_INDEX_C+2 + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C+2    => (
+      baseAddr           => x"0300",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C+3    => (
-      baseAddr           => DAC_INDEX_C+3 + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C+3    => (
+      baseAddr           => x"0400",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C+4    => (
-      baseAddr           => DAC_INDEX_C+4 + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C+4    => (
+      baseAddr           => x"0500",
       addrBits           => 4,
       connectivity       => X"0001"),
-    DAC_INDEX_C+5    => (
-      baseAddr           => DAC_INDEX_C+5 + AXI_BASE_ADDR_G,
+    BOARD_INDEX_C+5    => (
+      baseAddr           => x"0600",
       addrBits           => 4,
-      connectivity       => X"0001"),
-    DAC_INDEX_C+6    => (
-      baseAddr           => DAC_INDEX_C+6 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C    => (
-      baseAddr           => ADC_INDEX_C + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+1    => (
-      baseAddr           => ADC_INDEX_C+1 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+2    => (
-      baseAddr           => ADC_INDEX_C+2 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+3    => (
-      baseAddr           => ADC_INDEX_C+3 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+4    => (
-      baseAddr           => ADC_INDEX_C+4 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+5    => (
-      baseAddr           => ADC_INDEX_C+5 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
-    ADC_INDEX_C+6    => (
-      baseAddr           => ADC_INDEX_C+6 + AXI_BASE_ADDR_G,
-      addrBits           => 4,
-      connectivity       => X"0001"),
+      connectivity       => X"0001")
+      );
 
   signal locAxilWriteMasters : AxiLiteWriteMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
@@ -164,56 +131,45 @@ constant DAC_INDEX_C : natural := ADC_INDEX_C + 6;
 
 Begin
 
-  type RegType is record
-    aRising : slv(1 downto 0);
-    bRising : slv(1 downto 0);
-    Count   : slv(31 downto 0);
-	 SpeedCntr	: slv(31 downto 0);
-	 Speed	: slv(31 downto 0);
-	 Dir   : sl;
-  end record RegType;
-
-  constant REG_INIT_C : RegType :=
-    (
-      aRising => (others => '0'),
-      bRising => (others => '0'),
-      Count   => (others => '0'),
-		SpeedCntr		=> (others => '0'),
-		Speed => 	 (others => '0'),
-		Dir => '0'
-      );
-
-  signal r   : RegType := REG_INIT_C;
-  signal rin : RegType;
-
-begin
-genDacSpi : for I in 0 to 5 generate
-uDacSpi : entity work.AxiSpiMaster is
+genFrontEnd : for I in 0 to 5 generate
+uFrontEnd : entity work.FrontEndBoard
    generic map (
-      TPD_G             => 1 ns;
-      AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C;
-      ADDRESS_SIZE_G    => 15;
-      DATA_SIZE_G       => 8;
-      MODE_G            => "WO";  -- Or "WO" (write only),  "RO" (read only)
-      CPHA_G            => '0';
-      CPOL_G            => '0';
-      CLK_PERIOD_G      => 6.4E-9;  -- 156Mhz
-      SPI_SCLK_PERIOD_G => 100.0E-6
-      );
+      TPD_G             => 1 ns,
+      AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
+      CLK_PERIOD_G      => 6.4E-9  -- 156Mhz
+      )
    port map (
-      axiClk => axiLiteClk;
-      axiRst => axiLiteRst;
+      axiLiteClk => axiLiteClk,
+      axiLiteRst => axiLiteRst,
 
-      axiReadMaster  => locAxilWriteMasters(DAC_INDEX_C+I);
-      axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C+I);
-      axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C+I);
-      axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C+I);
+      axiReadMaster  => locAxilReadMasters(BOARD_INDEX_C+I),
+      axiReadSlave   => locAxilReadSlaves(BOARD_INDEX_C+I),
+      axiWriteMaster => locAxilWriteMasters(BOARD_INDEX_C+I),
+      axiWriteSlave  => locAxilWriteSlaves(BOARD_INDEX_C+I),
 
-      coreSclk  => dacSclk;
-      coreSDin  => '0';
-      coreSDout => dacDout
-      coreCsb   : out sl
-      );
-end entity AxiSpiMaster;
+-- Controller IO
+-- Ion Pump Control Board ADC SPI Interfaces
+    iMonDin => iMonDin(I),                  -- Serial in from Current Mon ADC
+    vMonDin => vMonDin(I),                   -- Serial in from Voltage Mon ADC
+    pMonDin => pMonDin(I),                   -- Serial in from Power Mon ADC
+    adcSClk => adcSclk(I),                   -- Clock for Monitor ADCs
+
+-- Ion Pump Control Board ADC SPI Interfaces
+    dacDout  => dacDout(I),                  -- Serial out for Setpoint DACs
+    dacSclk  => dacSclk(I),                 -- Clock for the Setpoint DACs
+    iProgCsN => iProgCsN(I),                 -- Chip Enable for Current DAC
+    vProgCsN => vProgCsN(I),                 -- Chip Enable for Voltage DAC
+    pProgCsN => pProgCsN(I),                 -- Chip Enable for Power DAC
+
+-- Ion Pump Control Board Mode bits
+    iMode => iMode(I),                    -- HVPS in Current Limit Mode
+    vMode => vMode(I),                     -- HVPS in Voltage Limit Mode
+    pMode => pMode(I),                    -- HVPS in Power Limit Mode
+
+-- Ion Pump Enable
+    enable => enable(I)                    -- Enable HVPS
+    );
+    end generate;
+end  Behavioral;
 
 

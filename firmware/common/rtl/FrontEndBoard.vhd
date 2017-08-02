@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 7/25/2017 11:10:54 AM
+--      Last change: JO 8/1/2017 2:28:15 PM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -39,9 +39,9 @@ use work.AxiLitePkg.all;
 
 entity FrontEndBoard is
   generic (
-    TPD_G            : TPD_G,
-    AXIL_BASE_ADDR_G : AXI_CONFIG_C(BOARD_INDEX_C).baseAddr,
-    AXI_ERROR_RESP_G : AXI_ERROR_RESP_G
+    TPD_G            : time := 1 ns;
+    AXI_ERROR_RESP_G   : slv(1 downto 0)        := AXI_RESP_DECERR_C;
+          CLK_PERIOD_G    : real   := 6.4E-9  -- 156Mhz
     );
   port (
 
@@ -87,6 +87,7 @@ architecture Behavioral of FrontEndBoard is
   signal idacSclk    : slv(2 downto 0);
   signal idacDout    : slv(2 downto 0);
   signal iCsb        : slv(2 downto 0);
+  signal adcIn      : slv(2 downto 0);
 
   -------------------------------------------------------------------------------------------------
   -- AXI Lite Config and Signals
@@ -100,31 +101,31 @@ architecture Behavioral of FrontEndBoard is
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     REG_INDEX_C    => (
-      baseAddr     => 0 + AXI_BASE_ADDR_G,
+      baseAddr     => X"00",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+0  => (
-      baseAddr     => DAC_INDEX_C+0 + AXI_BASE_ADDR_G,
+      baseAddr     => x"01",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+1  => (
-      baseAddr     => DAC_INDEX_C+1 + AXI_BASE_ADDR_G,
+      baseAddr     => x"02",
       addrBits     => 4,
       connectivity => X"0001"),
     DAC_INDEX_C+2  => (
-      baseAddr     => DAC_INDEX_C+2 + AXI_BASE_ADDR_G,
+      baseAddr     => x"03",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+0  => (
-      baseAddr     => ADC_INDEX_C + AXI_BASE_ADDR_G,
+      baseAddr     => x"04",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+1  => (
-      baseAddr     => ADC_INDEX_C+1 + AXI_BASE_ADDR_G,
+      baseAddr     => x"05",
       addrBits     => 4,
       connectivity => X"0001"),
     ADC_INDEX_C+2  => (
-      baseAddr     => ADC_INDEX_C+2 + AXI_BASE_ADDR_G,
+      baseAddr     => x"06",
       addrBits     => 4,
       connectivity => X"0001")
     );
@@ -136,126 +137,122 @@ architecture Behavioral of FrontEndBoard is
 
 begin
 
-    iProgCsN <= iCsb(0);
-    vProgCsN <= iCsb(1);
-    pProgCsN <= iCsb(2);
+  iProgCsN <= iCsb(0);
+  vProgCsN <= iCsb(1);
+  pProgCsN <= iCsb(2);
 
-    dacClkSel : process (dacSclk, axiReadMaster.awaddr)
-    begin
-      case axiReadMaster.awaddr(2 downto 0) is
-        when "001" =>
-          dacSclk <= idacSclk(0);
-          dacDout <= idacDout(0);
-        when "010" =>
-          dacSclk <= idacSclk(1);
-          dacDout <= idacDout(1);
-        when "011" =>
-          dacSclk <= idacSclk(2);
-          dacDout <= idacDout(2);
-        when others =>
-          dacSclk <= '0';
-          dacDout <= '0';
-      end case;
-    end process;
+  dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
+  begin
+    case axiWriteMaster.awaddr(2 downto 0) is
+      when "001" =>
+        dacSclk <= idacSclk(0);
+        dacDout <= idacDout(0);
+      when "010" =>
+        dacSclk <= idacSclk(1);
+        dacDout <= idacDout(1);
+      when "011" =>
+        dacSclk <= idacSclk(2);
+        dacDout <= idacDout(2);
+      when others =>
+        dacSclk <= '0';
+        dacDout <= '0';
+    end case;
+  end process;
 
-    adcIn(0) <= iMonDin;
-    adcIn(1) <= vMonDin;
-    adcIn(2) <= pMonDin;
+  adcIn(0) <= iMonDin;
+  adcIn(1) <= vMonDin;
+  adcIn(2) <= pMonDin;
 
-    adcClkSel : process (dacSclk, axiReadMaster.araddr)
-    begin
-      case axiReadMaster.araddr(2 downto 0) is
-        when "100" =>
-          dacSclk <= idacSclk(0);
-        when "101" =>
-          dacSclk <= idacSclk(1);
-        when "110" =>
-          dacSclk <= idacSclk(2);
-        when others =>
-          dacSclk <= '0';
-      end case;
-    end process;
+  adcClkSel : process (idacSclk, axiReadMaster.araddr)
+  begin
+    case axiReadMaster.araddr(2 downto 0) is
+      when "100" =>
+        dacSclk <= idacSclk(0);
+      when "101" =>
+        dacSclk <= idacSclk(1);
+      when "110" =>
+        dacSclk <= idacSclk(2);
+      when others =>
+        dacSclk <= '0';
+    end case;
+  end process;
 
 
-      uFrontEndReg : entity work.FrontEndReg is
-        generic map (
-          TPD_G             => 1 ns;
-          AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C;
-          );
-        port map (
-          axiClk => axiLiteClk;
-          axiRst => axiLiteRst;
+  uFrontEndReg : entity work.FrontEndReg
+    generic map (
+      TPD_G            => 1 ns,
+      AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
+      )
+    port map (
+      axilClk => axiLiteClk,
+      axilRst => axiLiteRst,
+ 
 
-          axiReadMaster  => locAxilWriteMasters(REG_INDEX_C);
-          axiReadSlave   => locAxilReadSlaves(REG_INDEX_C);
-          axiWriteMaster => locAxilWriteMasters(REG_INDEX_C);
-          axiWriteSlave  => locAxilWriteSlaves(REG_INDEX_C);
+      axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
+      axilReadSlave   => locAxilReadSlaves(REG_INDEX_C),
+      axilWriteMaster => locAxilWriteMasters(REG_INDEX_C),
+      axilWriteSlave  => locAxilWriteSlaves(REG_INDEX_C),
 
-          iMode  => iMode;
-          vMode  => vMode;
-          pMode => pMode;
-          Enable   => enable
-          );
+      iMode  => iMode,
+      vMode  => vMode,
+      pMode  => pMode,
+      Enable => enable
+      );
 
 
     genDacSpi : for I in 0 to 2 generate
-      uDacSpi : entity work.AxiSpiMaster is
+      uDacSpi : entity work.AxiSpiMaster
         generic map (
-          TPD_G             => 1 ns;
-          AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C;
-          ADDRESS_SIZE_G    => 15;
-          DATA_SIZE_G       => 8;
-          MODE_G            => "WO";  -- Or "WO" (write only),  "RO" (read only)
-          CPHA_G            => '0';
-          CPOL_G            => '0';
-          CLK_PERIOD_G      => 6.4E-9;  -- 156Mhz
-          SPI_SCLK_PERIOD_G => 100.0E-6
-          );
+          TPD_G             => 1 ns,
+          AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
+          ADDRESS_SIZE_G    => 15,
+          DATA_SIZE_G       => 8,
+          MODE_G            => "WO", -- Or "WO" (write only),  "RO" (read only)
+          CPHA_G            => '0',
+          CPOL_G            => '0',
+          CLK_PERIOD_G      => 6.4E-9, -- 156Mhz
+          SPI_SCLK_PERIOD_G => 1.0E-6
+          )
         port map (
-          axiClk => axiLiteClk;
-          axiRst => axiLiteRst;
+          axiClk => axiLiteClk,
+          axiRst => axiLiteRst,
 
-          axiReadMaster  => locAxilWriteMasters(DAC_INDEX_C+I);
-          axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C+I);
-          axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C+I);
-          axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C+I);
+          axiReadMaster  => locAxilReadMasters(DAC_INDEX_C+I),
+          axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C+I),
+          axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C+I),
+          axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C+I),
 
-          coreSclk  => idacSclk(I);
-          coreSDin  => '0';
-          coreSDout => idacDout(I);
+          coreSclk  => idacSclk(I),
+          coreSDin  => '0',
+          coreSDout => idacDout(I),
           coreCsb   => iCsb(I)
           );
       end generate;
-      
-        genADCSpi : for I in 0 to 2 generate
-          uDacSpi : entity work.Max11202 is
-            generic map (
-              TPD_G            => 1 ns;
-              AXI_ERROR_RESP_G => AXI_RESP_DECERR_C;
-              ADDRESS_SIZE_G   => 0;
-              DATA_SIZE_G      => 24;
-              MODE_G           => "RO";  -- Or "WO" (write only),  "RO" (read only)
-              CPHA_G           => '0';
-              CPOL_G           => '0';
-              CLK_PERIOD_G     => 6.4E-9;  -- 156Mhz
-              SCLK_PERIOD_G    => 100.0E-6
-              );
-            port map (
-              axiClk => axiLiteClk;
-              axiRst => axiLiteRst;
 
-              axiReadMaster  => locAxilWriteMasters(ADC_INDEX_C+I);
-              axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C+I);
-              axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C+I);
-              axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C+I);
+      genADC : for I in 0 to 2 generate
+        uADC : entity work.AxiMax11202Master 
+          generic map (
+    TPD_G                => 1 ns,
+    AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
+    CLK_PERIOD_G         => 6.4E-9,
+    SERIAL_SCLK_PERIOD_G => 1.0E-6
+          )
+         port map (
+    axiClk => axiLiteClk,
+    axiRst => axiLiteRst,
 
-              coreSclk => adcSclk(I);
-              coreSDin => adcSdin(I)
+    axiReadMaster  => locAxilReadMasters(ADC_INDEX_C+I),
+    axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C+I),
+    axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C+I),
+    axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C+I),
 
-              );
-          end generate;
+    coreSclk => adcSClk,
+    coreSDin => adcIn
+
+            );
+        end generate;
 
 
-        end entity FrontEndBoard;
+      end Behavioral;
 
 

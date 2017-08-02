@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 3:10:01 PM
---      Last change: JO 7/18/2017 3:59:45 PM
+--      Last change: JO 8/1/2017 2:20:35 PM
 --
 -------------------------------------------------------------------------------
 -- Title      : 
@@ -45,12 +45,12 @@ use work.StdRtlPkg.all;
 entity max11202Master is
   generic (
     TPD_G                : time := 1 ns;
-    CLK_PERIOD_G         : real := 8.0E-9;
+    CLK_PERIOD_G         : real := 6.4E-9;
     SERIAL_SCLK_PERIOD_G : real := 1.0E-6);  -- 1 MHz
   port (
     --Global Signals
     clk    : in  sl;
-    sRst   : in  sl;
+    Rst   : in  sl;
     -- Parallel interface
     wrEn   : in  sl;
     rdEn   : out sl;
@@ -158,7 +158,7 @@ begin
     when others => null;
   end case;
 
-  if (sRst = '1') then
+  if (Rst = '1') then
     v := REG_INIT_C;
   end if;
 
