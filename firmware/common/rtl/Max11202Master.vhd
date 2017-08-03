@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 3:10:01 PM
---      Last change: JO 8/2/2017 12:09:33 PM
+--      Last change: JO 8/3/2017 1:38:37 PM
 --
 -------------------------------------------------------------------------------
 -- Title      : 
@@ -54,8 +54,9 @@ entity max11202Master is
     -- Parallel interface
     wrEn   : in  sl;
     rdEn   : out sl;
-    rdAddr : in  slv(1 downto 0);
-    rdData : out slv(31 downto 0);
+    rdDataA : out slv(31 downto 0);
+    rdDataB : out slv(31 downto 0);
+    rdDataC : out slv(31 downto 0);
     Sclk   : out sl;
     Sdin   : in  slv(2 downto 0)
     );
@@ -99,7 +100,7 @@ architecture rtl of max11202Master is
 
 begin
 
-  comb : process (r, Rst, wrEn, sdin, rdAddr) is
+  comb : process (r, Rst, wrEn, sdin) is
     variable v : RegType;
   begin
     v := r;
@@ -158,6 +159,10 @@ begin
       when others => null;
     end case;
 
+	 rdDataA <= r.rdData(0);
+	 rdDataB <= r.rdData(1);
+	 rdDataC <= r.rdData(2);
+
     if (Rst = '1') then
       v := REG_INIT_C;
     end if;
@@ -167,7 +172,6 @@ begin
     Sclk <= r.Sclk;
 
     rdEn   <= r.rdEn;
-    rddata <= r.rddata(conv_integer(rdAddr));
 
   end process comb;
 

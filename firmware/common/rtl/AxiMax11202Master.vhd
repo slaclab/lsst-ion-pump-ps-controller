@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 8/2/2017 9:12:15 AM
+--      Last change: JO 8/3/2017 1:54:33 PM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
@@ -84,8 +84,11 @@ end entity AxiMax11202Master;
 
 architecture rtl of AxiMax11202Master is
 
-  signal rdData : slv(31 downto 0);
   signal rdEn   : sl;
+
+  type data32 is array (2 downto 0) of slv(31 downto 0);
+
+signal rdData : data32;
 
   type StateType is (WAIT_AXI_TXN_S, WAIT_CYCLE_S, WAIT_SERIAL_TXN_DONE_S);
 
@@ -138,7 +141,7 @@ begin
 
         if (rdEn = '1') then
           v.state              := WAIT_AXI_TXN_S;
-          v.axiReadSlave.rdata := rdData;
+          v.axiReadSlave.rdata := rddata(conv_integer(axiReadMaster.araddr));
           axiSlaveReadResponse(v.axiReadSlave);
 
         end if;
@@ -174,8 +177,9 @@ begin
       Rst    => axiRst,
       wrEn   => r.wrEn,
       rdEn   => rdEn,
-      rdAddr => axiReadMaster.araddr(1 downto 0),
-      rdData => rdData,
+    rdDataA => rdData(0),
+    rdDataB => rdData(1),
+    rdDataC => rdData(2),
       Sclk   => coreSclk,
       Sdin   => coreSDin
       );
