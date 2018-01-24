@@ -32,14 +32,18 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
 use work.StdRtlPkg.all;
 use work.AxiStreamPkg.all;
 use work.AxiLitePkg.all;
 
+
+
 entity LsstIonPumpCtrlApp is
   generic (
     TPD_G            : time            := 1ns;
+    AXI_BASE_ADDR_G    : slv(31 downto 0)        := x"00000000";
     AXI_CLK_FREQ_C   : real            := 156.0E+6;
     AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C
 
@@ -96,27 +100,27 @@ architecture Behavioral of LsstIonPumpCtrlApp is
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     BOARD_INDEX_C   => (
-      baseAddr      => x"0000_0000",
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_0000",
       addrBits      => 4,
       connectivity  => X"0001"),
     BOARD_INDEX_C+1 => (
-      baseAddr      => x"0000_0100",
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_0100",
       addrBits      => 4,
       connectivity  => X"0001"),
     BOARD_INDEX_C+2 => (
-      baseAddr      => x"0000_0200",
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_0200",
       addrBits      => 4,
       connectivity  => X"0001"),
     BOARD_INDEX_C+3 => (
-      baseAddr      => x"0000_0300",
+      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0300",
       addrBits      => 4,
       connectivity  => X"0001"),
     BOARD_INDEX_C+4 => (
-      baseAddr      => x"0000_0400",
+      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0400",
       addrBits      => 4,
       connectivity  => X"0001"),
     BOARD_INDEX_C+5 => (
-      baseAddr      => x"0000_0500",
+      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0500",
       addrBits      => 4,
       connectivity  => X"0001")
     );
@@ -132,6 +136,7 @@ begin
     uFrontEnd : entity work.FrontEndBoard
       generic map (
         TPD_G            => 1 ns,
+        AXI_BASE_ADDR_G  => AXI_CROSSBAR_MASTERS_CONFIG_C(i).baseAddr,
         AXI_ERROR_RESP_G => AXI_RESP_DECERR_C,
         CLK_PERIOD_G     => 6.4E-9      -- 156Mhz
         )

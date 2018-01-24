@@ -32,6 +32,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
 use work.StdRtlPkg.all;
 use work.AxiStreamPkg.all;
@@ -40,6 +41,7 @@ use work.AxiLitePkg.all;
 entity FrontEndBoard is
   generic (
     TPD_G            : time            := 1 ns;
+    AXI_BASE_ADDR_G    : slv(31 downto 0)        := x"00000000";
     AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C;
     CLK_PERIOD_G     : real            := 6.4E-9  -- 156Mhz
     );
@@ -60,7 +62,7 @@ entity FrontEndBoard is
     pMonDin : in  sl;                   -- Serial in from Power Mon ADC
     adcSClk : out sl;                   -- Clock for Monitor ADCs
 
--- Ion Pump Control Board ADC SPI Interfaces
+-- Ion Pump Control Board DAC SPI Interfaces
     dacDout  : out sl;                  -- Serial out for Setpoint DACs
     dacSclk  : out sl;                  -- Clock for the Setpoint DACs
     iProgCsL : out sl;                  -- Chip Enable for Current DAC
@@ -84,8 +86,8 @@ architecture Behavioral of FrontEndBoard is
   signal writeMaster : AxiLiteWriteMasterType;
   signal writeSlave  : AxiLiteWriteSlaveType;
   signal axiRstL     : sl;
-  signal idacSclk    : slv(2 downto 0);
-  signal idacDout    : slv(2 downto 0);
+  signal idacSclk    : sl;
+  signal idacDout    : sl;
   signal iCsb        : slv(2 downto 0);
   signal adcIn       : slv(2 downto 0);
 
@@ -93,39 +95,23 @@ architecture Behavioral of FrontEndBoard is
   -- AXI Lite Config and Signals
   -------------------------------------------------------------------------------------------------
 
-  constant NUM_AXI_MASTERS_C : natural := 7;
+  constant NUM_AXI_MASTERS_C : natural := 3;
+  
   constant REG_INDEX_C       : natural := 0;
-
-  constant DAC_INDEX_C : natural := 1;
-  constant ADC_INDEX_C : natural := DAC_INDEX_C + 3;
+  constant DAC_INDEX_C          : natural := 1;
+  constant ADC_INDEX_C          : natural := 2;
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     REG_INDEX_C    => (
-      baseAddr     => X"0000_0000",
+      baseAddr     => AXI_BASE_ADDR_G + X"0000_0000",
       addrBits     => 4,
       connectivity => X"0001"),
-    DAC_INDEX_C+0  => (
-      baseAddr     => x"0000_0001",
+    DAC_INDEX_C  => (
+      baseAddr     =>AXI_BASE_ADDR_G +  x"0000_0100",
       addrBits     => 4,
       connectivity => X"0001"),
-    DAC_INDEX_C+1  => (
-      baseAddr     => x"0000_0002",
-      addrBits     => 4,
-      connectivity => X"0001"),
-    DAC_INDEX_C+2  => (
-      baseAddr     => x"0000_0003",
-      addrBits     => 4,
-      connectivity => X"0001"),
-    ADC_INDEX_C+0  => (
-      baseAddr     => x"0000_0004",
-      addrBits     => 4,
-      connectivity => X"0001"),
-    ADC_INDEX_C+1  => (
-      baseAddr     => x"0000_0005",
-      addrBits     => 4,
-      connectivity => X"0001"),
-    ADC_INDEX_C+2  => (
-      baseAddr     => x"0000_0006",
+    ADC_INDEX_C  => (
+      baseAddr     => AXI_BASE_ADDR_G + x"0000_0400",
       addrBits     => 4,
       connectivity => X"0001")
     );
@@ -144,41 +130,41 @@ begin
 
   adcSclk <= iadcSclk(0);
 
-  dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
-  begin
-    case axiWriteMaster.awaddr(2 downto 0) is
-      when "001" =>
-        dacSclk <= idacSclk(0);
-        dacDout <= idacDout(0);
-      when "010" =>
-        dacSclk <= idacSclk(1);
-        dacDout <= idacDout(1);
-      when "011" =>
-        dacSclk <= idacSclk(2);
-        dacDout <= idacDout(2);
-      when others =>
-        dacSclk <= '0';
-        dacDout <= '0';
-    end case;
-  end process;
+--  dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
+--  begin
+--    case axiWriteMaster.awaddr(2 downto 0) is
+--      when "001" =>
+--        dacSclk <= idacSclk(0);
+--        dacDout <= idacDout(0);
+--      when "010" =>
+--        dacSclk <= idacSclk(1);
+--        dacDout <= idacDout(1);
+--      when "011" =>
+--        dacSclk <= idacSclk(2);
+--        dacDout <= idacDout(2);
+--      when others =>
+--        dacSclk <= '0';
+--        dacDout <= '0';
+--    end case;
+--  end process;
 
   adcIn(0) <= iMonDin;
   adcIn(1) <= vMonDin;
   adcIn(2) <= pMonDin;
 
-  adcClkSel : process (idacSclk, axiReadMaster.araddr)
-  begin
-    case axiReadMaster.araddr(2 downto 0) is
-      when "100" =>
-        dacSclk <= idacSclk(0);
-      when "101" =>
-        dacSclk <= idacSclk(1);
-      when "110" =>
-        dacSclk <= idacSclk(2);
-      when others =>
-        dacSclk <= '0';
-    end case;
-  end process;
+--  adcClkSel : process (idacSclk, axiReadMaster.araddr)
+--  begin
+--    case axiReadMaster.araddr(2 downto 0) is
+--      when "100" =>
+--        dacSclk <= idacSclk(0);
+--      when "101" =>
+--        dacSclk <= idacSclk(1);
+--      when "110" =>
+--        dacSclk <= idacSclk(2);
+--      when others =>
+--        dacSclk <= '0';
+--    end case;
+--  end process;
 
 
   uFrontEndReg : entity work.FrontEndReg
@@ -203,7 +189,6 @@ begin
       );
 
 
-  genDacSpi : for I in 0 to 2 generate
     uDacSpi : entity work.AxiSpiMaster
       generic map (
         TPD_G             => 1 ns,
@@ -214,25 +199,26 @@ begin
         CPHA_G            => '0',
         CPOL_G            => '0',
         CLK_PERIOD_G      => 6.4E-9,    -- 156Mhz
+        SPI_NUM_CHIPS_G   => 3, 
         SPI_SCLK_PERIOD_G => 1.0E-6
         )
       port map (
         axiClk => axilClk,
         axiRst => axilRst,
 
-        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C+I),
-        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C+I),
-        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C+I),
-        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C+I),
+        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C),
+        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C),
+        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C),
+        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C),
 
-        coreSclk  => idacSclk(I),
+        coreSclk  => idacSclk,
         coreSDin  => '0',
-        coreSDout => idacDout(I),
-        coreCsb   => iCsb(I)
+        coreSDout => idacDout,
+        coreMCsb   => iCsb
         );
-  end generate;
 
-  genADC : for I in 0 to 2 generate
+
+
     uADC : entity work.AxiMax11202Master
       generic map (
         TPD_G                => 1 ns,
@@ -244,16 +230,16 @@ begin
         axiClk => axilClk,
         axiRst => axilRst,
 
-        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C+I),
-        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C+I),
-        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C+I),
-        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C+I),
+        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C),
+        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
+        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
+        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
 
-        coreSclk => iadcSClk(I),
+        coreSclk => ADCSClk,
         coreSDin => adcIn
 
         );
-  end generate;
+
 
 
 end Behavioral;
