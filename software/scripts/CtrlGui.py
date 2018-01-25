@@ -1,4 +1,4 @@
-import lsst-ion-pump-ps-controller as lippc
+import lsst_ion_pump_ps_controller._LsstIonPumpPsController as lippc
 
 import rogue
 import PyQt4.QtGui

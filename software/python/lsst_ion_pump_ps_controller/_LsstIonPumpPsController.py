@@ -30,7 +30,7 @@ class LsstIonPumpCtrlRoot(pr.Root):
 
         for i in range(5):
             self.add(FrontEndBoard(
-                name=f'FrontEndBoard[{i}]',
+                name='FrontEndBoard[{i}]',
                 offset=0x00040000 + (0x1000 * i),
             ))
 
@@ -74,13 +74,13 @@ class FrontEndBoard(pr.Device):
 
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name=f'DAC[{i}]',
+                name='DAC[{i}]',
                 offset= 0x0100 + (i*4)
             ))
 
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name=f'ADC[{i}]',
+                name='ADC[{i}]',
                 offset= 0x0200 + (i*4)
             ))
             
