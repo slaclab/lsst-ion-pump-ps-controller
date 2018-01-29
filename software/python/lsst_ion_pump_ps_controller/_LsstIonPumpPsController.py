@@ -7,11 +7,11 @@ import surf.devices.micron
 
 class LsstIonPumpCtrlRoot(pr.Root):
     def __init__(self, name='LsstIonPumpCtrlRoot', **kwargs):
-        super().__init__(self, name=name, **kwargs)
+        super().__init__(description="LSST ION PUMP", name=name, **kwargs)
 
         # Open UDP socket with RSSI attached
-        udp = pyrogue.protocols.UdpRssiPack(host='192.168.2.194', port=8192, size=1400)
-
+        #udp = pyrogue.protocols.UdpRssiPack(host='192.168.1.10', port=8192, size=1400)
+        udp = rogue.protocols.udp.Client('192.168.1.10', 8192, 1400)
         # Create SRP
         srp = rogue.protocols.srp.SrpV3()
 
