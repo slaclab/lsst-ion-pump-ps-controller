@@ -16,7 +16,7 @@ class LsstIonPumpCtrlRoot(pr.Root):
         srp = rogue.protocols.srp.SrpV3()
 
         # Attach SRP to UDP - TDEST 0
-        pyrogue.streamConnectBiDir(srp, udp.application(0))
+        pyrogue.streamConnectBiDir(srp, udp)
 
         self.add(surf.axi.AxiVersion(
             memBase=srp,
