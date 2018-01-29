@@ -30,22 +30,22 @@ class LsstIonPumpCtrlRoot(pr.Root):
 
         for i in range(5):
             self.add(FrontEndBoard(
-                name='FrontEndBoard[{i}]',
+                enabled=False,
+                name=f'FrontEndBoard[{i}]',
                 offset=0x00040000 + (0x1000 * i),
             ))
 
+        self.start()
+
 class FrontEndBoard(pr.Device):
     def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
-
-        self.add(Regs(
-            offset=0x0000,
-        ))
+        super().__init__(**kwargs)
 
         self.add(pr.RemoteVariable(
             name='HwEnable',
             offset=0x0,
             bitOffset=0,
+            bitSize=1,
             mode='RW',
             base=pr.Bool,
         ))
@@ -54,6 +54,7 @@ class FrontEndBoard(pr.Device):
             name='IMode',
             offset=0x0,
             bitOffset=1,
+            bitSize=1,
             mode='RO',
             base=pr.Bool,
         ))
@@ -61,6 +62,7 @@ class FrontEndBoard(pr.Device):
             name='VMode',
             offset=0x0,
             bitOffset=2,
+            bitSize=1,
             mode='RO',
             base=pr.Bool,            
         ))
@@ -68,19 +70,20 @@ class FrontEndBoard(pr.Device):
             name='PMode',
             offset=0x0,
             bitOffset=3,
+            bitSize=1,
             mode='RO',
             base=pr.Bool,            
         ))
 
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name='DAC[{i}]',
+                name=f'DAC[{i}]',
                 offset= 0x0100 + (i*4)
             ))
 
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name='ADC[{i}]',
+                name=f'ADC[{i}]',
                 offset= 0x0200 + (i*4)
             ))
             

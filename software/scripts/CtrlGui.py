@@ -1,8 +1,11 @@
 import lsst_ion_pump_ps_controller as lippc
 
 import rogue
+import pyrogue
+import pyrogue.gui
 import PyQt4.QtGui
 import PyQt4.QtCore
+import sys
 
 if __name__ == "__main__":
 
