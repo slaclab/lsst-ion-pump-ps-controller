@@ -77,14 +77,32 @@ class FrontEndBoard(pr.Device):
 
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name=f'DAC[{i}]',
+                name=f'DAC_RAW[{i}]',
                 offset= 0x0100 + (i*4)
             ))
 
+            self.add(pr.LinkVariable(
+                name=f'DAC_V[{i}]',
+                variable=self.DAC_RAW[i],
+                linkedGet = lambda: self.DAC_RAW[i].value() * DAC_MULT,
+                linkedSet = lambda value: self.DAC_RAW[i].set(int(value / DAC_MULT))
+                disp='{:1.3f}',
+                units = 'V',
+                
+
         for i in range(3):
             self.add(pr.RemoteVariable(
-                name=f'ADC[{i}]',
-                offset= 0x0200 + (i*4)
+                name=f'ADC_RAW[{i}]',
+                offset= 0x0200 + (i*4),
+                mode='RO',
             ))
-            
+
+            self.add(pr.LinkVariable(
+                name=f'ADC_V[{i}]',
+                variable=self.ADC_RAW[i],
+                mode='RO',
+                linkedGet=lambda: self.ADC_RAW[i].value() * ADC_MULTIPLIER,
+            ))
+                
+
                 
