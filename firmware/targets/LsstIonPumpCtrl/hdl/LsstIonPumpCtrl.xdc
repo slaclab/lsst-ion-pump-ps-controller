@@ -38,8 +38,8 @@ set_property -dict { PACKAGE_PIN P22    IOSTANDARD LVCMOS33 } [get_ports { bootM
 set_property -dict { PACKAGE_PIN R22    IOSTANDARD LVCMOS33 } [get_ports { bootMiso}]
 set_property -dict { PACKAGE_PIN T19    IOSTANDARD LVCMOS33 } [get_ports { bootCsL}]
 
-set_property -dict { PACKAGE_PIN F10    IOSTANDARD LVCMOS33 } [get_ports { ethClkP}]
-set_property -dict { PACKAGE_PIN E10    IOSTANDARD LVCMOS33 } [get_ports { ethClkN}]
+#set_property -dict { PACKAGE_PIN F10    IOSTANDARD LVCMOS33 } [get_ports { ethClkP}]
+#set_property -dict { PACKAGE_PIN E10    IOSTANDARD LVCMOS33 } [get_ports { ethClkN}]
 set_property -dict { PACKAGE_PIN T1     IOSTANDARD LVCMOS33 } [get_ports { vProgCsL[5]}]
 set_property -dict { PACKAGE_PIN B1     IOSTANDARD LVCMOS33 } [get_ports { vProgCsL[4]}]
 set_property -dict { PACKAGE_PIN B15    IOSTANDARD LVCMOS33 } [get_ports { vProgCsL[3]}]
@@ -58,10 +58,12 @@ set_property -dict { PACKAGE_PIN A19    IOSTANDARD LVCMOS33 } [get_ports { vMode
 set_property -dict { PACKAGE_PIN AA4    IOSTANDARD LVCMOS33 } [get_ports { vMode[2]}]
 set_property -dict { PACKAGE_PIN AB12   IOSTANDARD LVCMOS33 } [get_ports { vMode[1]}]
 set_property -dict { PACKAGE_PIN K21    IOSTANDARD LVCMOS33 } [get_ports { vMode[0]}]
-set_property -dict { PACKAGE_PIN B4     IOSTANDARD LVCMOS33 } [get_ports { ethTxP}]
-set_property -dict { PACKAGE_PIN A4     IOSTANDARD LVCMOS33 } [get_ports { ethTxN}]
-set_property -dict { PACKAGE_PIN B8     IOSTANDARD LVCMOS33 } [get_ports { ethRxP}]
-set_property -dict { PACKAGE_PIN A8     IOSTANDARD LVCMOS33 } [get_ports { ethRxN}]
+
+#set_property -dict { PACKAGE_PIN B4     IOSTANDARD LVCMOS33 } [get_ports { ethTxP}]
+#set_property -dict { PACKAGE_PIN A4     IOSTANDARD LVCMOS33 } [get_ports { ethTxN}]
+#set_property -dict { PACKAGE_PIN B8     IOSTANDARD LVCMOS33 } [get_ports { ethRxP}]
+#set_property -dict { PACKAGE_PIN A8     IOSTANDARD LVCMOS33 } [get_ports { ethRxN}]
+
 set_property -dict { PACKAGE_PIN R1     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[5]}]
 set_property -dict { PACKAGE_PIN C2     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[4]}]
 set_property -dict { PACKAGE_PIN B16    IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[3]}]

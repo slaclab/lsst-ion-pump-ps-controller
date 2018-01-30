@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 8/2/2017 9:52:21 AM
+--      Last change: JO 1/29/2018 1:09:10 PM
 --
 -------------------------------------------------------------------------------
 -- File       : lsst-ion-pump-ps-contoller.vhd
@@ -101,27 +101,27 @@ architecture Behavioral of LsstIonPumpCtrlApp is
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     BOARD_INDEX_C   => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_0000",
-      addrBits      => 4,
+      addrBits      => 8,
       connectivity  => X"0001"),
     BOARD_INDEX_C+1 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_0100",
-      addrBits      => 4,
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_1000",
+      addrBits      => 8,
       connectivity  => X"0001"),
     BOARD_INDEX_C+2 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_0200",
-      addrBits      => 4,
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_2000",
+      addrBits      => 8,
       connectivity  => X"0001"),
     BOARD_INDEX_C+3 => (
-      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0300",
-      addrBits      => 4,
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_3000",
+      addrBits      => 8,
       connectivity  => X"0001"),
     BOARD_INDEX_C+4 => (
-      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0400",
-      addrBits      => 4,
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_4000",
+      addrBits      => 8,
       connectivity  => X"0001"),
     BOARD_INDEX_C+5 => (
-      baseAddr      =>  AXI_BASE_ADDR_G + x"0000_0500",
-      addrBits      => 4,
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_5000",
+      addrBits      => 8,
       connectivity  => X"0001")
     );
 

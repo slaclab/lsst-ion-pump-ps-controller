@@ -314,7 +314,7 @@ begin
     generic map (
       TPD_G            => TPD_G,
       AXI_CLK_FREQ_C   => SYS_CLK_FREQ_C,
---         AXI_BASE_ADDR_G  => AXI_CONFIG_C(ION_CONTROL_INDEX_C).baseAddr,
+      AXI_BASE_ADDR_G  => AXI_CONFIG_C(ION_CONTROL_INDEX_C).baseAddr,
       AXI_ERROR_RESP_G => AXI_ERROR_RESP_G)
     port map (
       -- AXI-Lite Interface

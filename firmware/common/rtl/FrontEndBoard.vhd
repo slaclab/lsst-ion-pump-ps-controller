@@ -104,15 +104,15 @@ architecture Behavioral of FrontEndBoard is
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     REG_INDEX_C    => (
       baseAddr     => AXI_BASE_ADDR_G + X"0000_0000",
-      addrBits     => 4,
+      addrBits     => 8,
       connectivity => X"0001"),
     DAC_INDEX_C  => (
       baseAddr     =>AXI_BASE_ADDR_G +  x"0000_0100",
-      addrBits     => 4,
+      addrBits     => 8,
       connectivity => X"0001"),
     ADC_INDEX_C  => (
       baseAddr     => AXI_BASE_ADDR_G + x"0000_0400",
-      addrBits     => 4,
+      addrBits     => 8,
       connectivity => X"0001")
     );
 
@@ -189,56 +189,56 @@ begin
       );
 
 
-    uDacSpi : entity work.AxiSpiMaster
-      generic map (
-        TPD_G             => 1 ns,
-        AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
-        ADDRESS_SIZE_G    => 15,
-        DATA_SIZE_G       => 8,
-        MODE_G            => "WO",  -- Or "WO" (write only),  "RO" (read only)
-        CPHA_G            => '0',
-        CPOL_G            => '0',
-        CLK_PERIOD_G      => 6.4E-9,    -- 156Mhz
-        SPI_NUM_CHIPS_G   => 3, 
-        SPI_SCLK_PERIOD_G => 1.0E-6
-        )
-      port map (
-        axiClk => axilClk,
-        axiRst => axilRst,
+--    uDacSpi : entity work.AxiSpiMaster
+--      generic map (
+--        TPD_G             => 1 ns,
+--        AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
+--        ADDRESS_SIZE_G    => 15,
+--        DATA_SIZE_G       => 8,
+--        MODE_G            => "WO",  -- Or "WO" (write only),  "RO" (read only)
+--        CPHA_G            => '0',
+--        CPOL_G            => '0',
+--        CLK_PERIOD_G      => 6.4E-9,    -- 156Mhz
+--        SPI_NUM_CHIPS_G   => 3, 
+--        SPI_SCLK_PERIOD_G => 1.0E-6
+--        )
+--      port map (
+--        axiClk => axilClk,
+--        axiRst => axilRst,
 
-        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C),
-        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C),
-        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C),
-        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C),
+--        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C),
+--        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C),
+--        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C),
+--        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C),
 
-        coreSclk  => idacSclk,
-        coreSDin  => '0',
-        coreSDout => idacDout,
-        coreMCsb   => iCsb
-        );
+--        coreSclk  => idacSclk,
+--        coreSDin  => '0',
+--        coreSDout => idacDout,
+--        coreMCsb   => iCsb
+--        );
 
 
 
-    uADC : entity work.AxiMax11202Master
-      generic map (
-        TPD_G                => 1 ns,
-        AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
-        CLK_PERIOD_G         => 6.4E-9,
-        SERIAL_SCLK_PERIOD_G => 1.0E-6
-        )
-      port map (
-        axiClk => axilClk,
-        axiRst => axilRst,
+--    uADC : entity work.AxiMax11202Master
+--      generic map (
+--        TPD_G                => 1 ns,
+--        AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
+--        CLK_PERIOD_G         => 6.4E-9,
+--        SERIAL_SCLK_PERIOD_G => 1.0E-6
+--        )
+--      port map (
+--        axiClk => axilClk,
+--        axiRst => axilRst,
 
-        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C),
-        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
-        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
-        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
+--        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C),
+--        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
+--        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
+--        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
 
-        coreSclk => ADCSClk,
-        coreSDin => adcIn
+--        coreSclk => ADCSClk,
+--        coreSDin => adcIn
 
-        );
+--        );
 
 
 
