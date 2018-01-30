@@ -41,39 +41,6 @@ class FrontEndBoard(pr.Device):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.add(pr.RemoteVariable(
-            name='HwEnable',
-            offset=0x0,
-            bitOffset=0,
-            bitSize=1,
-            mode='RW',
-            base=pr.Bool,
-        ))
-
-        self.add(pr.RemoteVariable(
-            name='IMode',
-            offset=0x0,
-            bitOffset=1,
-            bitSize=1,
-            mode='RO',
-            base=pr.Bool,
-        ))
-        self.add(pr.RemoteVariable(
-            name='VMode',
-            offset=0x0,
-            bitOffset=2,
-            bitSize=1,
-            mode='RO',
-            base=pr.Bool,            
-        ))
-        self.add(pr.RemoteVariable(
-            name='PMode',
-            offset=0x0,
-            bitOffset=3,
-            bitSize=1,
-            mode='RO',
-            base=pr.Bool,            
-        ))
 
         for i in range(3):
             self.add(pr.RemoteVariable(
@@ -90,19 +57,4 @@ class FrontEndBoard(pr.Device):
                 units = 'V',
             )) 
 
-        for i in range(3):
-            self.add(pr.RemoteVariable(
-                name=f'ADC_RAW[{i}]',
-                offset= 0x0200 + (i*4),
-                mode='RO',
-            ))
-
-            self.add(pr.LinkVariable(
-                name=f'ADC_V[{i}]',
-                variable=self.ADC_RAW[i],
-                mode='RO',
-                linkedGet=lambda: self.ADC_RAW[i].value() * 5.0,
-            ))
-                
-
-                
+                 

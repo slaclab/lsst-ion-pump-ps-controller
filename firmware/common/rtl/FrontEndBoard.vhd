@@ -167,55 +167,55 @@ begin
 --  end process;
 
 
-  uFrontEndReg : entity work.FrontEndReg
-    generic map (
-      TPD_G            => 1 ns,
-      AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
-      )
-    port map (
-      axilClk => axilClk,
-      axilRst => axilRst,
+--  uFrontEndReg : entity work.FrontEndReg
+--    generic map (
+--      TPD_G            => 1 ns,
+--      AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
+--      )
+--    port map (
+--      axilClk => axilClk,
+--      axilRst => axilRst,
 
 
-      axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
-      axilReadSlave   => locAxilReadSlaves(REG_INDEX_C),
-      axilWriteMaster => locAxilWriteMasters(REG_INDEX_C),
-      axilWriteSlave  => locAxilWriteSlaves(REG_INDEX_C),
+--      axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
+--      axilReadSlave   => locAxilReadSlaves(REG_INDEX_C),
+--      axilWriteMaster => locAxilWriteMasters(REG_INDEX_C),
+--      axilWriteSlave  => locAxilWriteSlaves(REG_INDEX_C),
 
-      iMode  => iMode,
-      vMode  => vMode,
-      pMode  => pMode,
-      Enable => enable
-      );
+--      iMode  => iMode,
+--      vMode  => vMode,
+--      pMode  => pMode,
+--      Enable => enable
+--      );
 
 
---    uDacSpi : entity work.AxiSpiMaster
---      generic map (
---        TPD_G             => 1 ns,
---        AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
---        ADDRESS_SIZE_G    => 15,
---        DATA_SIZE_G       => 8,
---        MODE_G            => "WO",  -- Or "WO" (write only),  "RO" (read only)
---        CPHA_G            => '0',
---        CPOL_G            => '0',
---        CLK_PERIOD_G      => 6.4E-9,    -- 156Mhz
---        SPI_NUM_CHIPS_G   => 3, 
---        SPI_SCLK_PERIOD_G => 1.0E-6
---        )
---      port map (
---        axiClk => axilClk,
---        axiRst => axilRst,
+    uDacSpi : entity work.AxiSpiMaster
+      generic map (
+        TPD_G             => 1 ns,
+        AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
+        ADDRESS_SIZE_G    => 15,
+        DATA_SIZE_G       => 8,
+        MODE_G            => "WO",  -- Or "WO" (write only),  "RO" (read only)
+        CPHA_G            => '0',
+        CPOL_G            => '0',
+        CLK_PERIOD_G      => 6.4E-9,    -- 156Mhz
+        SPI_NUM_CHIPS_G   => 3, 
+        SPI_SCLK_PERIOD_G => 1.0E-6
+        )
+      port map (
+        axiClk => axilClk,
+        axiRst => axilRst,
 
---        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C),
---        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C),
---        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C),
---        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C),
+        axiReadMaster  => locAxilReadMasters(DAC_INDEX_C),
+        axiReadSlave   => locAxilReadSlaves(DAC_INDEX_C),
+        axiWriteMaster => locAxilWriteMasters(DAC_INDEX_C),
+        axiWriteSlave  => locAxilWriteSlaves(DAC_INDEX_C),
 
---        coreSclk  => idacSclk,
---        coreSDin  => '0',
---        coreSDout => idacDout,
---        coreMCsb   => iCsb
---        );
+        coreSclk  => idacSclk,
+        coreSDin  => '0',
+        coreSDout => idacDout,
+        coreMCsb   => iCsb
+        );
 
 
 
