@@ -50,10 +50,10 @@ entity FrontEndBoard is
 -- Slave AXI-Lite Interface
     axilClk        : in  sl;
     axilRst        : in  sl;
-    axiReadMaster  : in  AxiLiteReadMasterType;
-    axiReadSlave   : out AxiLiteReadSlaveType;
-    axiWriteMaster : in  AxiLiteWriteMasterType;
-    axiWriteSlave  : out AxiLiteWriteSlaveType;
+    axilReadMaster  : in  AxiLiteReadMasterType;
+    axilReadSlave   : out AxiLiteReadSlaveType;
+    axilWriteMaster : in  AxiLiteWriteMasterType;
+    axilWriteSlave  : out AxiLiteWriteSlaveType;
 
 -- Controller IO
 -- Ion Pump Control Board ADC SPI Interfaces
@@ -81,11 +81,6 @@ end entity FrontEndBoard;
 
 architecture Behavioral of FrontEndBoard is
 
-  signal readMaster  : AxiLiteReadMasterType;
-  signal readSlave   : AxiLiteReadSlaveType;
-  signal writeMaster : AxiLiteWriteMasterType;
-  signal writeSlave  : AxiLiteWriteSlaveType;
-  signal axiRstL     : sl;
   signal idacSclk    : sl;
   signal idacDout    : sl;
   signal iCsb        : slv(2 downto 0);
@@ -129,6 +124,29 @@ begin
   pProgCsL <= iCsb(2);
 
   adcSclk <= iadcSclk(0);
+  
+  
+    ---------------------------
+    -- AXI-Lite Crossbar Module
+    ---------------------------        
+    U_Xbar : entity work.AxiLiteCrossbar
+      generic map (
+        TPD_G              => TPD_G,
+        DEC_ERROR_RESP_G   => AXI_ERROR_RESP_G,
+        NUM_SLAVE_SLOTS_G  => 1,
+        NUM_MASTER_SLOTS_G => NUM_AXI_MASTERS_C,
+        MASTERS_CONFIG_G   => AXI_CROSSBAR_MASTERS_CONFIG_C)
+      port map (
+        axiClk              => axilClk,
+        axiClkRst           => axilRst,
+        sAxiWriteMasters(0) => axilWriteMaster,
+        sAxiWriteSlaves(0)  => axilWriteSlave,
+        sAxiReadMasters(0)  => axilReadMaster,
+        sAxiReadSlaves(0)   => axilReadSlave,
+        mAxiWriteMasters    => LocAxilWriteMasters,
+        mAxiWriteSlaves     => LocAxilWriteSlaves,
+        mAxiReadMasters     => LocAxilReadMasters,
+        mAxiReadSlaves      => LocAxilReadSlaves);
 
 --  dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
 --  begin

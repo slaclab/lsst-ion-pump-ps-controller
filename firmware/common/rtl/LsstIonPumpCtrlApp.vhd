@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 1/29/2018 1:09:10 PM
+--      Last change: JO 1/30/2018 3:45:53 PM
 --
 -------------------------------------------------------------------------------
 -- File       : lsst-ion-pump-ps-contoller.vhd
@@ -84,12 +84,7 @@ end entity LsstIonPumpCtrlApp;
 
 architecture Behavioral of LsstIonPumpCtrlApp is
 
-  signal readMaster  : AxiLiteReadMasterType;
-  signal readSlave   : AxiLiteReadSlaveType;
-  signal writeMaster : AxiLiteWriteMasterType;
-  signal writeSlave  : AxiLiteWriteSlaveType;
-  signal axiRstL     : sl;
-
+ 
   -------------------------------------------------------------------------------------------------
   -- AXI Lite Config and Signals
   -------------------------------------------------------------------------------------------------
@@ -101,27 +96,27 @@ architecture Behavioral of LsstIonPumpCtrlApp is
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     BOARD_INDEX_C   => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_0000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+1 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_1000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+2 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_2000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+3 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_3000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+4 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_4000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+5 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_5000",
-      addrBits      => 8,
+      addrBits      => 12,
       connectivity  => X"0001")
     );
 
@@ -131,6 +126,29 @@ architecture Behavioral of LsstIonPumpCtrlApp is
   signal locAxilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
 
 begin
+
+
+  ---------------------------
+  -- AXI-Lite Crossbar Module
+  ---------------------------        
+  U_Xbar : entity work.AxiLiteCrossbar
+    generic map (
+      TPD_G              => TPD_G,
+      DEC_ERROR_RESP_G   => AXI_ERROR_RESP_G,
+      NUM_SLAVE_SLOTS_G  => 1,
+      NUM_MASTER_SLOTS_G => NUM_AXI_MASTERS_C,
+      MASTERS_CONFIG_G   => AXI_CROSSBAR_MASTERS_CONFIG_C)
+    port map (
+      axiClk              => axilClk,
+      axiClkRst           => axilRst,
+      sAxiWriteMasters(0) => axilWriteMaster,
+      sAxiWriteSlaves(0)  => axilWriteSlave,
+      sAxiReadMasters(0)  => axilReadMaster,
+      sAxiReadSlaves(0)   => axilReadSlave,
+      mAxiWriteMasters    => LocAxilWriteMasters,
+      mAxiWriteSlaves     => LocAxilWriteSlaves,
+      mAxiReadMasters     => LocAxilReadMasters,
+      mAxiReadSlaves      => LocAxilReadSlaves);
 
   genFrontEnd : for I in 0 to 5 generate
     uFrontEnd : entity work.FrontEndBoard
@@ -144,10 +162,10 @@ begin
         axilClk => axilClk,
         axilRst => axilRst,
 
-        axiReadMaster  => locAxilReadMasters(BOARD_INDEX_C+I),
-        axiReadSlave   => locAxilReadSlaves(BOARD_INDEX_C+I),
-        axiWriteMaster => locAxilWriteMasters(BOARD_INDEX_C+I),
-        axiWriteSlave  => locAxilWriteSlaves(BOARD_INDEX_C+I),
+        axiLReadMaster  => LocAxilReadMasters(BOARD_INDEX_C+I),
+        axiLReadSlave   => LocAxilReadSlaves(BOARD_INDEX_C+I),
+        axiLWriteMaster => LocAxilWriteMasters(BOARD_INDEX_C+I),
+        axiLWriteSlave  => LocAxilWriteSlaves(BOARD_INDEX_C+I),
 
 -- Controller IO
 -- Ion Pump Control Board ADC SPI Interfaces
