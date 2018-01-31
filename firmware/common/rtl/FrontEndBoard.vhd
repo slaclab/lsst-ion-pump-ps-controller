@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 8/2/2017 12:23:02 PM
+--      Last change: JO 1/30/2018 5:03:21 PM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -124,8 +124,10 @@ begin
   pProgCsL <= iCsb(2);
 
   adcSclk <= iadcSclk(0);
-  
-  
+  DacDout <= idacDout;
+  DacSclk <= idacSclk;
+
+  Enable <= '0';
     ---------------------------
     -- AXI-Lite Crossbar Module
     ---------------------------        
