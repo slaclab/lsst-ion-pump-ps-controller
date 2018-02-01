@@ -30,33 +30,29 @@ class LsstIonPumpCtrlRoot(pr.Root):
 
         for i in range(5):
             self.add(FrontEndBoard(
-               memBase=srp,
-               enabled=False,
-               name=f'FrontEndBoard[{i}]',
-               offset=0x00040000 + (0x1000 * i),
+                memBase=srp,
+                name=f'FrontEndBoard[{i}]',
+                offset=0x00040000 + (0x1000 * i),
             ))
 
-        self.start()
+        self.start(pollEn=False)
 
 class FrontEndBoard(pr.Device):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
  
-
         for i in range(3):
             self.add(pr.RemoteVariable(
                name=f'DAC_RAW[{i}]',
                 offset= 0x0100 + (i*4),
-                mode='WO'
-            ))
+                mode='WO'))
 
             self.add(pr.LinkVariable(
                 name=f'DAC_V[{i}]',
                 variable=self.DAC_RAW[i],
-                linkedGet = lambda: self.DAC_RAW[i].value() * 5.0,
-                linkedSet = lambda value: self.DAC_RAW[i].set(int(value / 5.0)),
+                linkedGet = lambda raw=self.DAC_RAW[i]: raw.value() * 5.0,
+                linkedSet = lambda value, raw=self.DAC_RAW[i]: raw.set(int(value / 5.0)),
                 disp='{:1.3f}',
-                units = 'V',
-            )) 
+                units = 'V'))
 
                  
