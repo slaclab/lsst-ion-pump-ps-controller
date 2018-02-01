@@ -213,8 +213,8 @@ begin
       generic map (
         TPD_G             => 1 ns,
         AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
-        ADDRESS_SIZE_G    => 15,
-        DATA_SIZE_G       => 8,
+        ADDRESS_SIZE_G    => 0,
+        DATA_SIZE_G       => 16,
         MODE_G            => "WO",  -- Or "WO" (write only),  "RO" (read only)
         CPHA_G            => '0',
         CPOL_G            => '0',
