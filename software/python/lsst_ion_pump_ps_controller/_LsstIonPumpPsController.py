@@ -43,7 +43,7 @@ class FrontEndBoard(pr.Device):
  
         for i in range(3):
             self.add(pr.RemoteVariable(
-               name=f'DAC_RAW[{i}]',
+                name=f'DAC_RAW[{i}]',
                 offset= 0x0100 + (i*4),
                 mode='WO'))
 
