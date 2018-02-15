@@ -7,3 +7,6 @@
 [submodule "software/rogue"]
 	path = software/rogue
 	url = git@github.com:slaclab/rogue.git
+[submodule "firmware/submodules/lsst-pwr-ctrl-core"]
+	path = firmware/submodules/lsst-pwr-ctrl-core
+	url = git@github.com:slaclab/lsst-pwr-ctrl-core
