@@ -1,4 +1,4 @@
-import lsst_ion_pump_ps_controller as lippc
+import lsst_5v_dcpdu._Lsst5vDCPdu as dcpdu
 
 import rogue
 import pyrogue
@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     rogue.Logging.setFilter('pyrogue.SrpV3', rogue.Logging.Debug)
     
-    with lippc.LsstIonPumpCtrlRoot() as root:
+    with dcpdu.Lsst5vDCPduRoot() as root:
         appTop = PyQt4.QtGui.QApplication(sys.argv)
         guiTop = pyrogue.gui.GuiTop(group='Main')
         print('guiTop.addTree')

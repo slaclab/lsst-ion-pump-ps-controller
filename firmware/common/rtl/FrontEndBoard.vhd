@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 1/30/2018 5:03:21 PM
+--      Last change: JO 2/1/2018 4:37:43 PM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -127,7 +127,6 @@ begin
   DacDout <= idacDout;
   DacSclk <= idacSclk;
 
-  Enable <= '0';
     ---------------------------
     -- AXI-Lite Crossbar Module
     ---------------------------        
@@ -150,42 +149,10 @@ begin
         mAxiReadMasters     => LocAxilReadMasters,
         mAxiReadSlaves      => LocAxilReadSlaves);
 
---  dacClkSel : process (idacSclk, idacDout, axiWriteMaster.awaddr)
---  begin
---    case axiWriteMaster.awaddr(2 downto 0) is
---      when "001" =>
---        dacSclk <= idacSclk(0);
---        dacDout <= idacDout(0);
---      when "010" =>
---        dacSclk <= idacSclk(1);
---        dacDout <= idacDout(1);
---      when "011" =>
---        dacSclk <= idacSclk(2);
---        dacDout <= idacDout(2);
---      when others =>
---        dacSclk <= '0';
---        dacDout <= '0';
---    end case;
---  end process;
 
   adcIn(0) <= iMonDin;
   adcIn(1) <= vMonDin;
   adcIn(2) <= pMonDin;
-
---  adcClkSel : process (idacSclk, axiReadMaster.araddr)
---  begin
---    case axiReadMaster.araddr(2 downto 0) is
---      when "100" =>
---        dacSclk <= idacSclk(0);
---      when "101" =>
---        dacSclk <= idacSclk(1);
---      when "110" =>
---        dacSclk <= idacSclk(2);
---      when others =>
---        dacSclk <= '0';
---    end case;
---  end process;
-
 
 --  uFrontEndReg : entity work.FrontEndReg
 --    generic map (
@@ -237,8 +204,6 @@ begin
         coreMCsb   => iCsb
         );
 
-
-
 --    uADC : entity work.AxiMax11202Master
 --      generic map (
 --        TPD_G                => 1 ns,
@@ -257,7 +222,7 @@ begin
 
 --        coreSclk => ADCSClk,
 --        coreSDin => adcIn
-
+--
 --        );
 
 
