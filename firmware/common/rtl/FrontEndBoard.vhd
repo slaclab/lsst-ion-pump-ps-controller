@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 2/1/2018 4:37:43 PM
+--      Last change: JO 3/26/2018 9:34:33 AM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -154,26 +154,26 @@ begin
   adcIn(1) <= vMonDin;
   adcIn(2) <= pMonDin;
 
---  uFrontEndReg : entity work.FrontEndReg
---    generic map (
---      TPD_G            => 1 ns,
---      AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
---      )
---    port map (
---      axilClk => axilClk,
---      axilRst => axilRst,
+  uFrontEndReg : entity work.FrontEndReg
+    generic map (
+      TPD_G            => 1 ns,
+      AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
+      )
+    port map (
+      axilClk => axilClk,
+      axilRst => axilRst,
 
 
---      axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
---      axilReadSlave   => locAxilReadSlaves(REG_INDEX_C),
---      axilWriteMaster => locAxilWriteMasters(REG_INDEX_C),
---      axilWriteSlave  => locAxilWriteSlaves(REG_INDEX_C),
+      axilReadMaster  => locAxilReadMasters(REG_INDEX_C),
+      axilReadSlave   => locAxilReadSlaves(REG_INDEX_C),
+      axilWriteMaster => locAxilWriteMasters(REG_INDEX_C),
+      axilWriteSlave  => locAxilWriteSlaves(REG_INDEX_C),
 
---      iMode  => iMode,
---      vMode  => vMode,
---      pMode  => pMode,
---      Enable => enable
---      );
+      iMode  => iMode,
+      vMode  => vMode,
+      pMode  => pMode,
+      Enable => enable
+      );
 
 
     uDacSpi : entity work.AxiSpiMaster
@@ -204,26 +204,26 @@ begin
         coreMCsb   => iCsb
         );
 
---    uADC : entity work.AxiMax11202Master
---      generic map (
---        TPD_G                => 1 ns,
---        AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
---        CLK_PERIOD_G         => 6.4E-9,
---        SERIAL_SCLK_PERIOD_G => 1.0E-6
---        )
---      port map (
---        axiClk => axilClk,
---        axiRst => axilRst,
+    uADC : entity work.Max11202AxilMaster
+      generic map (
+        TPD_G                => 1 ns,
+        AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
+        CLK_PERIOD_G         => 6.4E-9,
+        SERIAL_SCLK_PERIOD_G => 1.0E-6
+        )
+      port map (
+        axiClk => axilClk,
+        axiRst => axilRst,
 
---        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C),
---        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
---        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
---        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
+        axiReadMaster  => locAxilReadMasters(ADC_INDEX_C),
+        axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
+        axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
+        axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
 
---        coreSclk => ADCSClk,
---        coreSDin => adcIn
---
---        );
+        coreSclk => ADCSClk,
+        coreSDin => adcIn
+
+        );
 
 
 

@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/19/2017 1:33:09 PM
---      Last change: JO 8/2/2017 9:40:28 AM
+--      Last change: JO 3/26/2018 9:29:47 AM
 --
 -------------------------------------------------------------------------------
 -- File       : LsstIonPumpCtrl.vhd
@@ -89,9 +89,9 @@ architecture top_level of LsstIonPumpCtrl is
    signal axilClk          : sl;
    signal axilRst          : sl;
    signal axilWriteMasters : AxiLiteWriteMasterArray(6 downto 0);
-   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(6 downto 0);
+   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(6 downto 0) := (others => AXI_LITE_WRITE_SLAVE_EMPTY_DECERR_C);
    signal axilReadMasters  : AxiLiteReadMasterArray(6 downto 0);
-   signal axilReadSlaves   : AxiLiteReadSlaveArray(6 downto 0);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(6 downto 0) := (others => AXI_LITE_READ_SLAVE_EMPTY_DECERR_C);
 
 begin
 
@@ -130,21 +130,21 @@ begin
    ----------------------------------
    -- Terminate Unused AXI-Lite buses
    ----------------------------------
-   GEN_VEC :
-   for i in 6 downto 2 generate
-
-      U_AxiLiteEmpty : entity work.AxiLiteEmpty
-         generic map (
-            TPD_G => TPD_G)
-         port map (
-            axiClk         => axilClk,
-            axiClkRst      => axilRst,
-            axiReadMaster  => axilReadMasters(i),
-            axiReadSlave   => axilReadSlaves(i),
-            axiWriteMaster => axilWriteMasters(i),
-            axiWriteSlave  => axilWriteSlaves(i));
-
-   end generate GEN_VEC;
+--   GEN_VEC :
+--   for i in 6 downto 2 generate
+--
+--      U_AxiLiteEmpty : entity work.AxiLiteEmpty
+--         generic map (
+--            TPD_G => TPD_G)
+--         port map (
+--            axiClk         => axilClk,
+--            axiClkRst      => axilRst,
+--            axiReadMaster  => axilReadMasters(i),
+--            axiReadSlave   => axilReadSlaves(i),
+--            axiWriteMaster => axilWriteMasters(i),
+--            axiWriteSlave  => axilWriteSlaves(i));
+--
+--   end generate GEN_VEC;
 
    ----------------------------------------
    -- AXI-Lite: Configuration Memory Module
