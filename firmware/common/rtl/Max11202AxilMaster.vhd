@@ -2,24 +2,24 @@
 --                                                             --
 -----------------------------------------------------------------
 --
---      AxiMax11202Master.vhd - 
+--      Max11202AxilMaster.vhd -
 --
 --      Copyright(c) SLAC National Accelerator Laboratory 2000
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 8/3/2017 1:54:33 PM
+--      Last change: JO 3/27/2018 10:04:40 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
 -------------------------------------------------------------------------------
 -- File       : AxiMax11202Master.vhd
 -- From           : AxiSpiMaster by
--- Author     : Benjamin Reese  <bareese@slac.stanford.edu>
---            : Uros Legat Modified <ulegat@slac.stanford.edu>
+-- Author     :     Benjamin Reese  <bareese@slac.stanford.edu>
+--            :     Uros Legat Modified <ulegat@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-01-12
--- Last update: 2017-08-02
+-- Last update: 2018-03-27
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -61,11 +61,11 @@ use unisim.vcomponents.all;
 use work.StdRtlPkg.all;
 use work.AxiLitePkg.all;
 
-entity AxiMax11202Master is
+entity Max11202AxilMaster is
   generic (
     TPD_G                : time            := 1 ns;
     AXI_ERROR_RESP_G     : slv(1 downto 0) := AXI_RESP_DECERR_C;
-    CLK_PERIOD_G         : real            := 6.4E-9;
+    CLK_PERIOD_G         : real            := 8.0E-9;
     SERIAL_SCLK_PERIOD_G : real            := 1.0E-6
     );
   port (
@@ -82,13 +82,13 @@ entity AxiMax11202Master is
     );
 end entity AxiMax11202Master;
 
-architecture rtl of AxiMax11202Master is
+architecture rtl of Max11202AxilMaster is
 
-  signal rdEn   : sl;
+  signal rdEn : sl;
 
   type data32 is array (2 downto 0) of slv(31 downto 0);
 
-signal rdData : data32;
+  signal rdData : data32;
 
   type StateType is (WAIT_AXI_TXN_S, WAIT_CYCLE_S, WAIT_SERIAL_TXN_DONE_S);
 
@@ -173,14 +173,14 @@ begin
       CLK_PERIOD_G         => CLK_PERIOD_G,          -- 8.0E-9,
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
-      clk    => axiClk,
-      Rst    => axiRst,
-      wrEn   => r.wrEn,
-      rdEn   => rdEn,
-    rdDataA => rdData(0),
-    rdDataB => rdData(1),
-    rdDataC => rdData(2),
-      Sclk   => coreSclk,
-      Sdin   => coreSDin
+      clk     => axiClk,
+      Rst     => axiRst,
+      wrEn    => r.wrEn,
+      rdEn    => rdEn,
+      rdDataA => rdData(0),
+      rdDataB => rdData(1),
+      rdDataC => rdData(2),
+      Sclk    => coreSclk,
+      Sdin    => coreSDin
       );
 end architecture rtl;

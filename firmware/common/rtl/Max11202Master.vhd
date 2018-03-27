@@ -19,7 +19,7 @@
 -- Author     : Larry Ruckman  <ruckman@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2013-05-24
--- Last update: 2017-08-02
+-- Last update: 2018-03-27
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -49,16 +49,16 @@ entity max11202Master is
     SERIAL_SCLK_PERIOD_G : real := 1.0E-6);  -- 1 MHz
   port (
     --Global Signals
-    clk    : in  sl;
-    Rst    : in  sl;
+    clk     : in  sl;
+    Rst     : in  sl;
     -- Parallel interface
-    wrEn   : in  sl;
-    rdEn   : out sl;
+    wrEn    : in  sl;
+    rdEn    : out sl;
     rdDataA : out slv(31 downto 0);
     rdDataB : out slv(31 downto 0);
     rdDataC : out slv(31 downto 0);
-    Sclk   : out sl;
-    Sdin   : in  slv(2 downto 0)
+    Sclk    : out sl;
+    Sdin    : in  slv(2 downto 0)
     );
 end max11202Master;
 
@@ -159,9 +159,9 @@ begin
       when others => null;
     end case;
 
-	 rdDataA <= r.rdData(0);
-	 rdDataB <= r.rdData(1);
-	 rdDataC <= r.rdData(2);
+    rdDataA <= r.rdData(0);
+    rdDataB <= r.rdData(1);
+    rdDataC <= r.rdData(2);
 
     if (Rst = '1') then
       v := REG_INIT_C;
@@ -171,7 +171,7 @@ begin
 
     Sclk <= r.Sclk;
 
-    rdEn   <= r.rdEn;
+    rdEn <= r.rdEn;
 
   end process comb;
 

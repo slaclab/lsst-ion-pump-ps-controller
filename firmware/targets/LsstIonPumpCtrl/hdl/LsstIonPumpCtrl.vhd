@@ -76,7 +76,7 @@ entity LsstIonPumpCtrl is
       extRstL  : in    sl;
       -- XADC Ports
       vPIn     : in    sl;
-      vNIn     : in    sl
+      vNIn     : in    sl;
 		IonPumpEnL : in sl
 		);
 end LsstIonPumpCtrl;
@@ -113,7 +113,7 @@ begin
          axilWriteMasters => axilWriteMasters,
          axilWriteSlaves  => axilWriteSlaves,
          -- Misc.
-         extRstL          => extRstL,
+         extRstL          => '1',
          -- XADC Ports
          vPIn             => vPIn,
          vNIn             => vNIn,
