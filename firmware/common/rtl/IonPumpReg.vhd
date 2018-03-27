@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/25/2017 1:03:24 PM
---      Last change: JO 3/27/2018 11:20:19 AM
+--      Last change: JO 3/27/2018 11:41:16 AM
 --
 -------------------------------------------------------------------------------
 -- This file is part of 'LSST Firmware'.
@@ -30,7 +30,8 @@ use work.AxiLitePkg.all;
 entity IonPumpReg is
   generic (
     TPD_G            : time            := 1 ns;
-    AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C);
+    AXI_ERROR_RESP_G : slv(1 downto 0) := AXI_RESP_DECERR_C
+	 );
   port (
     -- AXI-Lite Interface
     axilClk         : in  sl;
@@ -47,21 +48,19 @@ entity IonPumpReg is
 
 -- Ion Pump Enable
     Enable : out slv(8 downto 0)        -- Enable HVPS
-
-
     );
 end entity IonPumpReg;
 
 architecture Behavioral of IonPumpReg is
 
   type RegType is record
-    ChannelEn      : slv(19 downto 0);
+    ChannelEn      : slv(8 downto 0);
     axilReadSlave  : AxiLiteReadSlaveType;
     axilWriteSlave : AxiLiteWriteSlaveType;
   end record;
 
   constant REG_INIT_C : RegType := (
-    ChannelEn      => x"00000",
+    ChannelEn      => (Others => '0'),
     axilReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
     axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C);
 

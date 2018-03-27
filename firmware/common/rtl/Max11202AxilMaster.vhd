@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 3/27/2018 10:04:40 AM
+--      Last change: JO 3/27/2018 11:37:16 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
@@ -80,7 +80,7 @@ entity Max11202AxilMaster is
     coreSclk : out sl;
     coreSDin : in  slv(2 downto 0)
     );
-end entity AxiMax11202Master;
+end entity Max11202AxilMaster;
 
 architecture rtl of Max11202AxilMaster is
 

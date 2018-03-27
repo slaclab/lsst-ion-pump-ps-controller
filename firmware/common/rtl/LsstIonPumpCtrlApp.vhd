@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 3/27/2018 11:00:32 AM
+--      Last change: JO 3/27/2018 11:31:01 AM
 --
 -------------------------------------------------------------------------------
 -- File       : lsst-ion-pump-ps-contoller.vhd
@@ -171,7 +171,8 @@ begin
   Registers : entity work.IonPumpReg
   generic map (
     TPD_G            => 1 ns,
-    AXI_ERROR_RESP_G => AXI_RESP_DECERR_C,
+    AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
+	 )
   port map (
     -- AXI-Lite Interface
     axilClk         => axilClk,
