@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/19/2017 1:33:09 PM
---      Last change: JO 3/26/2018 9:29:47 AM
+--      Last change: JO 3/27/2018 9:02:02 AM
 --
 -------------------------------------------------------------------------------
 -- File       : LsstIonPumpCtrl.vhd
@@ -42,22 +42,22 @@ entity LsstIonPumpCtrl is
       BUILD_INFO_G : BuildInfoType);
    port (
       -- Ion Pump Control Board ADC SPI Interfaces
-      iMonDin  : in    slv(5 downto 0);  -- Serial in from Current Mon ADC
-      vMonDin  : in    slv(5 downto 0);  -- Serial in from Voltage Mon ADC
-      pMonDin  : in    slv(5 downto 0);  -- Serial in from Power Mon ADC
-      adcSClk  : out   slv(5 downto 0);  -- Clock for Monitor ADCs
+      iMonDin  : in    slv(8 downto 0);  -- Serial in from Current Mon ADC
+      vMonDin  : in    slv(8 downto 0);  -- Serial in from Voltage Mon ADC
+      pMonDin  : in    slv(8 downto 0);  -- Serial in from Power Mon ADC
+      adcSClk  : out   slv(8 downto 0);  -- Clock for Monitor ADCs
       -- Ion Pump Control Board ADC SPI Interfaces
-      dacDout  : out   slv(5 downto 0);  -- Serial out for Setpoint DACs
-      dacSclk  : out   slv(5 downto 0);  -- Clock for the Setpoint DACs
-      iProgCsL : out   slv(5 downto 0);  -- Chip Enable for Current DAC
-      vProgCsL : out   slv(5 downto 0);  -- Chip Enable for Voltage DAC
-      pProgCsL : out   slv(5 downto 0);  -- Chip Enable for Power DAC
+      dacDout  : out   slv(8 downto 0);  -- Serial out for Setpoint DACs
+      dacSclk  : out   slv(8 downto 0);  -- Clock for the Setpoint DACs
+      iProgCsL : out   slv(8 downto 0);  -- Chip Enable for Current DAC
+      vProgCsL : out   slv(8 downto 0);  -- Chip Enable for Voltage DAC
+      pProgCsL : out   slv(8 downto 0);  -- Chip Enable for Power DAC
       -- Ion Pump Control Board Mode bits
-      iMode    : in    slv(5 downto 0);  -- HVPS in Current Limit Mode
-      vMode    : in    slv(5 downto 0);  -- HVPS in Voltage Limit Mode
-      pMode    : in    slv(5 downto 0);  -- HVPS in Power Limit Mode
-      -- Ion Pump Enable
-      enable   : out   slv(5 downto 0);  -- Enable HVPS
+      iMode    : in    slv(8 downto 0);  -- HVPS in Current Limit Mode
+      vMode    : in    slv(8 downto 0);  -- HVPS in Voltage Limit Mode
+      pMode    : in    slv(8 downto 0);  -- HVPS in Power Limit Mode
+      -- Ion Pump Front End Enable
+      enable   : out   slv(8 downto 0);  -- Enable HVPS
       -- Boot Memory Ports
       bootCsL  : out   sl;
       bootMosi : out   sl;
@@ -76,7 +76,9 @@ entity LsstIonPumpCtrl is
       extRstL  : in    sl;
       -- XADC Ports
       vPIn     : in    sl;
-      vNIn     : in    sl);
+      vNIn     : in    sl
+		IonPumpEnL : in sl
+		);
 end LsstIonPumpCtrl;
 
 architecture top_level of LsstIonPumpCtrl is
