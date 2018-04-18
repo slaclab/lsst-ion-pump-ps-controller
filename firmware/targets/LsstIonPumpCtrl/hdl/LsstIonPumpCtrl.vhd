@@ -53,6 +53,7 @@ entity LsstIonPumpCtrl is
       vProgCsL   : out   slv(8 downto 0);  -- Chip Enable for Voltage DAC
       pProgCsL   : out   slv(8 downto 0);  -- Chip Enable for Power DAC
       -- Ion Pump Control Board Mode bits
+      ionPumpEnL : in    sl;
       iMode      : in    slv(8 downto 0);  -- HVPS in Current Limit Mode
       vMode      : in    slv(8 downto 0);  -- HVPS in Voltage Limit Mode
       pMode      : in    slv(8 downto 0);  -- HVPS in Power Limit Mode
@@ -115,10 +116,10 @@ begin
          -- 1GbE Interface
          ethClkP          => ethClkP,
          ethClkN          => ethClkN,
-         ethRxP           => ethRxP,
-         ethRxN           => ethRxN,
-         ethTxP           => ethTxP,
-         ethTxN           => ethTxN);
+         ethRxP(0)        => ethRxP,
+         ethRxN(0)        => ethRxN,
+         ethTxP(0)        => ethTxP,
+         ethTxN(0)        => ethTxN);
 
    ----------------------------------------
    -- AXI-Lite: Configuration Memory Module

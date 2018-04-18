@@ -12,8 +12,7 @@
 ## Application Ports ##
 #######################
 
-set_property -dict { PACKAGE_PIN D22    IOSTANDARD xxx } [get_ports { IONPUMP_EN_N}]
-
+set_property -dict { PACKAGE_PIN D22    IOSTANDARD LVCMOS33 } [get_ports { ionPumpEnL}]
 
 set_property -dict { PACKAGE_PIN Y7     IOSTANDARD LVCMOS33 } [get_ports { dacSclk[8]}]
 set_property -dict { PACKAGE_PIN P6     IOSTANDARD LVCMOS33 } [get_ports { dacSclk[7]}]
@@ -40,8 +39,8 @@ set_property -dict { PACKAGE_PIN AB21   IOSTANDARD LVCMOS33 } [get_ports { extRs
 set_property -dict { PACKAGE_PIN V17    IOSTANDARD LVCMOS33 } [get_ports { promSda}]
 set_property -dict { PACKAGE_PIN AB20   IOSTANDARD LVCMOS33 } [get_ports { promScl}]
 
-#set_property -dict { PACKAGE_PIN F10    IOSTANDARD LVCMOS33 } [get_ports { ethClkP}]
-#set_property -dict { PACKAGE_PIN E10    IOSTANDARD LVCMOS33 } [get_ports { ethClkN}]
+set_property -dict { PACKAGE_PIN F10    IOSTANDARD LVCMOS33 } [get_ports { ethClkP}]
+set_property -dict { PACKAGE_PIN E10    IOSTANDARD LVCMOS33 } [get_ports { ethClkN}]
 
 set_property -dict { PACKAGE_PIN W4     IOSTANDARD LVCMOS33 } [get_ports { vProgCsL[8]}]
 set_property -dict { PACKAGE_PIN P4     IOSTANDARD LVCMOS33 } [get_ports { vProgCsL[7]}]
@@ -74,10 +73,10 @@ set_property -dict { PACKAGE_PIN AA4    IOSTANDARD LVCMOS33 } [get_ports { vMode
 set_property -dict { PACKAGE_PIN AB12   IOSTANDARD LVCMOS33 } [get_ports { vMode[1]}]
 set_property -dict { PACKAGE_PIN K21    IOSTANDARD LVCMOS33 } [get_ports { vMode[0]}]
 
-#set_property -dict { PACKAGE_PIN B4     IOSTANDARD LVCMOS33 } [get_ports { ethTxP}]
-#set_property -dict { PACKAGE_PIN A4     IOSTANDARD LVCMOS33 } [get_ports { ethTxN}]
-#set_property -dict { PACKAGE_PIN B8     IOSTANDARD LVCMOS33 } [get_ports { ethRxP}]
-#set_property -dict { PACKAGE_PIN A8     IOSTANDARD LVCMOS33 } [get_ports { ethRxN}]
+set_property -dict { PACKAGE_PIN B4     IOSTANDARD LVCMOS33 } [get_ports { ethTxP}]
+set_property -dict { PACKAGE_PIN A4     IOSTANDARD LVCMOS33 } [get_ports { ethTxN}]
+set_property -dict { PACKAGE_PIN B8     IOSTANDARD LVCMOS33 } [get_ports { ethRxP}]
+set_property -dict { PACKAGE_PIN A8     IOSTANDARD LVCMOS33 } [get_ports { ethRxN}]
 
 set_property -dict { PACKAGE_PIN V5     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[8]}]
 set_property -dict { PACKAGE_PIN M6     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[7]}]
@@ -148,7 +147,6 @@ set_property -dict { PACKAGE_PIN B21    IOSTANDARD LVCMOS33 } [get_ports { enabl
 set_property -dict { PACKAGE_PIN AB1    IOSTANDARD LVCMOS33 } [get_ports { enable[2]}]
 set_property -dict { PACKAGE_PIN AA10   IOSTANDARD LVCMOS33 } [get_ports { enable[1]}]
 set_property -dict { PACKAGE_PIN M21    IOSTANDARD LVCMOS33 } [get_ports { enable[0]}]
-
 
 set_property -dict { PACKAGE_PIN V3     IOSTANDARD LVCMOS33 } [get_ports { dacDout[8]}]
 set_property -dict { PACKAGE_PIN N4     IOSTANDARD LVCMOS33 } [get_ports { dacDout[7]}]
