@@ -73,8 +73,7 @@ entity LsstIonPumpCtrl is
       extRstL    : in    sl;
       -- XADC Ports
       vPIn       : in    sl;
-      vNIn       : in    sl;
-      IonPumpEnL : in    sl);
+      vNIn       : in    sl);
 end LsstIonPumpCtrl;
 
 architecture top_level of LsstIonPumpCtrl is
