@@ -70,8 +70,10 @@ base.Top.Fpga.Core.AxiVersion.printStatus()
 appTop = PyQt4.QtGui.QApplication(sys.argv)
 appTop.setStyle('Fusion')
 guiTop = pyrogue.gui.GuiTop(group='rootMesh')
-guiTop.resize(800, 1000)
+
 guiTop.addTree(base)
+guiTop.resize(800, 500)
+
 
 print("Starting GUI...\n");
 
