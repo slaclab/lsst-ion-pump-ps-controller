@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# Title      : PyRogue Ion Pump Module
+# Title      : PyRogue febBoard Module
 #-----------------------------------------------------------------------------
-
+# File       : SingleNodeTest.py
+# Created    : 2016-11-09
+# Last update: 2016-11-09
 #-----------------------------------------------------------------------------
 # Description:
-# Rogue interface to Ion Pump board
+# Rogue interface to FEB board
 #-----------------------------------------------------------------------------
 # This file is part of the LCLS2-PRL. It is subject to 
 # the license terms in the LICENSE.txt file found in the top-level directory 
@@ -70,10 +72,8 @@ base.Top.Fpga.Core.AxiVersion.printStatus()
 appTop = PyQt4.QtGui.QApplication(sys.argv)
 appTop.setStyle('Fusion')
 guiTop = pyrogue.gui.GuiTop(group='rootMesh')
-
+guiTop.resize(800, 1000)
 guiTop.addTree(base)
-guiTop.resize(800, 500)
-
 
 print("Starting GUI...\n");
 
