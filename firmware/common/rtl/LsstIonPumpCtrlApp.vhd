@@ -168,7 +168,7 @@ begin
 
   Registers : entity work.IonPumpReg
   generic map (
-    TPD_G            => 1 ns,
+    TPD_G            => TPD_G
 	 )
   port map (
     -- AXI-Lite Interface

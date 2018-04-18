@@ -40,16 +40,6 @@ set_property -dict { PACKAGE_PIN AB21   IOSTANDARD LVCMOS33 } [get_ports { extRs
 set_property -dict { PACKAGE_PIN V17    IOSTANDARD LVCMOS33 } [get_ports { promSda}]
 set_property -dict { PACKAGE_PIN AB20   IOSTANDARD LVCMOS33 } [get_ports { promScl}]
 
-#set_property -dict { PACKAGE_PIN L12    IOSTANDARD LVCMOS33 } [get_ports { BOOT_SCK}]
-#set_property -dict { PACKAGE_PIN P22    IOSTANDARD LVCMOS33 } [get_ports { BOOT_D[O]}]
-#set_property -dict { PACKAGE_PIN R22    IOSTANDARD LVCMOS33 } [get_ports { BOOT_D[1]}]
-#set_property -dict { PACKAGE_PIN P21    IOSTANDARD LVCMOS33 } [get_ports { BOOT_D[2]}]
-#set_property -dict { PACKAGE_PIN R21    IOSTANDARD LVCMOS33 } [get_ports { BOOT_D[3]}]
-
-set_property -dict { PACKAGE_PIN P22    IOSTANDARD LVCMOS33 } [get_ports { bootMosi}]
-set_property -dict { PACKAGE_PIN R22    IOSTANDARD LVCMOS33 } [get_ports { bootMiso}]
-set_property -dict { PACKAGE_PIN T19    IOSTANDARD LVCMOS33 } [get_ports { bootCsL}]
-
 #set_property -dict { PACKAGE_PIN F10    IOSTANDARD LVCMOS33 } [get_ports { ethClkP}]
 #set_property -dict { PACKAGE_PIN E10    IOSTANDARD LVCMOS33 } [get_ports { ethClkN}]
 

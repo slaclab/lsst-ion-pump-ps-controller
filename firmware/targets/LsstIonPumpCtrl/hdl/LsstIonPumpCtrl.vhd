@@ -58,10 +58,6 @@ entity LsstIonPumpCtrl is
       pMode      : in    slv(8 downto 0);  -- HVPS in Power Limit Mode
       -- Ion Pump Front End Enable
       enable     : out   slv(8 downto 0);  -- Enable HVPS
-      -- Boot Memory Ports
-      bootCsL    : out   sl;
-      bootMosi   : out   sl;
-      bootMiso   : in    sl;
       -- Scratch Pad Prom
       promScl    : inout sl;
       promSda    : inout sl;
@@ -77,8 +73,7 @@ entity LsstIonPumpCtrl is
       -- XADC Ports
       vPIn       : in    sl;
       vNIn       : in    sl;
-      IonPumpEnL : in    sl
-      );
+      IonPumpEnL : in    sl);
 end LsstIonPumpCtrl;
 
 architecture top_level of LsstIonPumpCtrl is
@@ -117,10 +112,6 @@ begin
          -- XADC Ports
          vPIn             => vPIn,
          vNIn             => vNIn,
-         -- Boot Memory Ports
-         bootCsL          => bootCsL,
-         bootMosi         => bootMosi,
-         bootMiso         => bootMiso,
          -- 1GbE Interface
          ethClkP          => ethClkP,
          ethClkN          => ethClkN,
