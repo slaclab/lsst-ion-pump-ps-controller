@@ -14,7 +14,7 @@
 -- File       : LsstIonPumpCtrl.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2017-04-20
--- Last update: 2018-02-14
+-- Last update: 2018-04-18
 -------------------------------------------------------------------------------
 -- Description: Firmware Target's Top Level
 -------------------------------------------------------------------------------
@@ -42,43 +42,43 @@ entity LsstIonPumpCtrl is
       BUILD_INFO_G : BuildInfoType);
    port (
       -- Ion Pump Control Board ADC SPI Interfaces
-      iMonDin  : in    slv(8 downto 0);  -- Serial in from Current Mon ADC
-      vMonDin  : in    slv(8 downto 0);  -- Serial in from Voltage Mon ADC
-      pMonDin  : in    slv(8 downto 0);  -- Serial in from Power Mon ADC
-      adcSClk  : out   slv(8 downto 0);  -- Clock for Monitor ADCs
+      iMonDin    : in    slv(8 downto 0);  -- Serial in from Current Mon ADC
+      vMonDin    : in    slv(8 downto 0);  -- Serial in from Voltage Mon ADC
+      pMonDin    : in    slv(8 downto 0);  -- Serial in from Power Mon ADC
+      adcSClk    : out   slv(8 downto 0);  -- Clock for Monitor ADCs
       -- Ion Pump Control Board ADC SPI Interfaces
-      dacDout  : out   slv(8 downto 0);  -- Serial out for Setpoint DACs
-      dacSclk  : out   slv(8 downto 0);  -- Clock for the Setpoint DACs
-      iProgCsL : out   slv(8 downto 0);  -- Chip Enable for Current DAC
-      vProgCsL : out   slv(8 downto 0);  -- Chip Enable for Voltage DAC
-      pProgCsL : out   slv(8 downto 0);  -- Chip Enable for Power DAC
+      dacDout    : out   slv(8 downto 0);  -- Serial out for Setpoint DACs
+      dacSclk    : out   slv(8 downto 0);  -- Clock for the Setpoint DACs
+      iProgCsL   : out   slv(8 downto 0);  -- Chip Enable for Current DAC
+      vProgCsL   : out   slv(8 downto 0);  -- Chip Enable for Voltage DAC
+      pProgCsL   : out   slv(8 downto 0);  -- Chip Enable for Power DAC
       -- Ion Pump Control Board Mode bits
-      iMode    : in    slv(8 downto 0);  -- HVPS in Current Limit Mode
-      vMode    : in    slv(8 downto 0);  -- HVPS in Voltage Limit Mode
-      pMode    : in    slv(8 downto 0);  -- HVPS in Power Limit Mode
+      iMode      : in    slv(8 downto 0);  -- HVPS in Current Limit Mode
+      vMode      : in    slv(8 downto 0);  -- HVPS in Voltage Limit Mode
+      pMode      : in    slv(8 downto 0);  -- HVPS in Power Limit Mode
       -- Ion Pump Front End Enable
-      enable   : out   slv(8 downto 0);  -- Enable HVPS
+      enable     : out   slv(8 downto 0);  -- Enable HVPS
       -- Boot Memory Ports
-      bootCsL  : out   sl;
-      bootMosi : out   sl;
-      bootMiso : in    sl;
+      bootCsL    : out   sl;
+      bootMosi   : out   sl;
+      bootMiso   : in    sl;
       -- Scratch Pad Prom
-      promScl  : inout sl;
-      promSda  : inout sl;
+      promScl    : inout sl;
+      promSda    : inout sl;
       -- 1GbE Ports
-      ethClkP  : in    sl;
-      ethClkN  : in    sl;
-      ethRxP   : in    sl;
-      ethRxN   : in    sl;
-      ethTxP   : out   sl;
-      ethTxN   : out   sl;
+      ethClkP    : in    sl;
+      ethClkN    : in    sl;
+      ethRxP     : in    sl;
+      ethRxN     : in    sl;
+      ethTxP     : out   sl;
+      ethTxN     : out   sl;
       -- Misc.
-      extRstL  : in    sl;
+      extRstL    : in    sl;
       -- XADC Ports
-      vPIn     : in    sl;
-      vNIn     : in    sl;
-		IonPumpEnL : in sl
-		);
+      vPIn       : in    sl;
+      vNIn       : in    sl;
+      IonPumpEnL : in    sl
+      );
 end LsstIonPumpCtrl;
 
 architecture top_level of LsstIonPumpCtrl is
@@ -93,7 +93,7 @@ architecture top_level of LsstIonPumpCtrl is
    signal axilWriteMasters : AxiLiteWriteMasterArray(6 downto 0);
    signal axilWriteSlaves  : AxiLiteWriteSlaveArray(6 downto 0) := (others => AXI_LITE_WRITE_SLAVE_EMPTY_DECERR_C);
    signal axilReadMasters  : AxiLiteReadMasterArray(6 downto 0);
-   signal axilReadSlaves   : AxiLiteReadSlaveArray(6 downto 0) := (others => AXI_LITE_READ_SLAVE_EMPTY_DECERR_C);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(6 downto 0)  := (others => AXI_LITE_READ_SLAVE_EMPTY_DECERR_C);
 
 begin
 
@@ -129,33 +129,14 @@ begin
          ethTxP           => ethTxP,
          ethTxN           => ethTxN);
 
-   ----------------------------------
-   -- Terminate Unused AXI-Lite buses
-   ----------------------------------
---   GEN_VEC :
---   for i in 6 downto 2 generate
---
---      U_AxiLiteEmpty : entity work.AxiLiteEmpty
---         generic map (
---            TPD_G => TPD_G)
---         port map (
---            axiClk         => axilClk,
---            axiClkRst      => axilRst,
---            axiReadMaster  => axilReadMasters(i),
---            axiReadSlave   => axilReadSlaves(i),
---            axiWriteMaster => axilWriteMasters(i),
---            axiWriteSlave  => axilWriteSlaves(i));
---
---   end generate GEN_VEC;
-
    ----------------------------------------
    -- AXI-Lite: Configuration Memory Module
    ----------------------------------------
    U_I2cProm : entity work.AxiI2cEeprom
       generic map (
          TPD_G          => TPD_G,
-         ADDR_WIDTH_G   => 13,          -- Need to verify this value!!!
-         I2C_ADDR_G     => "1010000",   -- Need to verify this value!!!
+         ADDR_WIDTH_G   => 13,
+         I2C_ADDR_G     => "1010000",
          AXI_CLK_FREQ_G => SYS_CLK_FREQ_C)
       port map (
          -- I2C Ports

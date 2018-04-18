@@ -64,7 +64,6 @@ use work.AxiLitePkg.all;
 entity Max11202AxilMaster is
   generic (
     TPD_G                : time            := 1 ns;
-    AXI_ERROR_RESP_G     : slv(1 downto 0) := AXI_RESP_DECERR_C;
     CLK_PERIOD_G         : real            := 8.0E-9;
     SERIAL_SCLK_PERIOD_G : real            := 1.0E-6
     );

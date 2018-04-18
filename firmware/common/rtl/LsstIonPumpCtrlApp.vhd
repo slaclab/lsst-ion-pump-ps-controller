@@ -44,8 +44,7 @@ entity LsstIonPumpCtrlApp is
   generic (
     TPD_G            : time             := 1ns;
     AXI_BASE_ADDR_G  : slv(31 downto 0) := x"00000000";
-    AXI_CLK_FREQ_C   : real             := 156.0E+6;
-    AXI_ERROR_RESP_G : slv(1 downto 0)  := AXI_RESP_DECERR_C
+    AXI_CLK_FREQ_C   : real             := 156.0E+6
 
     );
   port (
@@ -151,7 +150,6 @@ begin
   U_Xbar : entity work.AxiLiteCrossbar
     generic map (
       TPD_G              => TPD_G,
-      DEC_ERROR_RESP_G   => AXI_ERROR_RESP_G,
       NUM_SLAVE_SLOTS_G  => 1,
       NUM_MASTER_SLOTS_G => NUM_AXI_MASTERS_C,
       MASTERS_CONFIG_G   => AXI_CROSSBAR_MASTERS_CONFIG_C)
@@ -171,7 +169,6 @@ begin
   Registers : entity work.IonPumpReg
   generic map (
     TPD_G            => 1 ns,
-    AXI_ERROR_RESP_G => AXI_RESP_DECERR_C
 	 )
   port map (
     -- AXI-Lite Interface
@@ -198,7 +195,6 @@ begin
       generic map (
         TPD_G            => 1 ns,
         AXI_BASE_ADDR_G  => AXI_CROSSBAR_MASTERS_CONFIG_C(I).baseAddr,
-        AXI_ERROR_RESP_G => AXI_RESP_DECERR_C,
         CLK_PERIOD_G     => 8.0E-9      -- 156Mhz
         )
       port map (

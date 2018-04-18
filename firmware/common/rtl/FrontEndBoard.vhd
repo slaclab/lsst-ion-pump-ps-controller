@@ -42,7 +42,6 @@ entity FrontEndBoard is
   generic (
     TPD_G            : time             := 1 ns;
     AXI_BASE_ADDR_G  : slv(31 downto 0) := x"00000000";
-    AXI_ERROR_RESP_G : slv(1 downto 0)  := AXI_RESP_DECERR_C;
     CLK_PERIOD_G     : real             := 6.4E-9  -- 156Mhz
     );
   port (
@@ -123,7 +122,6 @@ begin
   U_Xbar : entity work.AxiLiteCrossbar
     generic map (
       TPD_G              => TPD_G,
-      DEC_ERROR_RESP_G   => AXI_ERROR_RESP_G,
       NUM_SLAVE_SLOTS_G  => 1,
       NUM_MASTER_SLOTS_G => NUM_AXI_MASTERS_C,
       MASTERS_CONFIG_G   => AXI_CROSSBAR_MASTERS_CONFIG_C)
@@ -147,7 +145,6 @@ begin
   uDacSpi : entity work.AxiSpiMaster
     generic map (
       TPD_G             => 1 ns,
-      AXI_ERROR_RESP_G  => AXI_RESP_DECERR_C,
       ADDRESS_SIZE_G    => 0,
       DATA_SIZE_G       => 16,
       MODE_G            => "WO",    -- Or "WO" (write only),  "RO" (read only)
@@ -175,7 +172,6 @@ begin
   uADC : entity work.Max11202AxilMaster
     generic map (
       TPD_G                => 1 ns,
-      AXI_ERROR_RESP_G     => AXI_RESP_DECERR_C,
       CLK_PERIOD_G         => 8.0E-9,
       SERIAL_SCLK_PERIOD_G => 1.0E-6
       )
