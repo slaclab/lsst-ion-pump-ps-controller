@@ -93,48 +93,7 @@ architecture Behavioral of LsstIonPumpCtrlApp is
 
   constant NUM_AXI_MASTERS_C : natural := 10; -- 1 Register, 9 Front Ends
 
-  constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
-    REGISTER_INDEX_C   => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_0000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+0 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_1000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+1 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_2000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+2 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_3000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+3 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_4000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+4 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_5000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+5 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_6000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+6 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_7000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+7 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_8000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+8 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_9000",
-      addrBits      => 12,
-      connectivity  => X"0001")
-    );
+  constant AXI_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0):= genAxiLiteConfig(NUM_AXI_MASTERS_C, AXI_BASE_ADDR_G, 16, 12);
 
   signal locAxilWriteMasters : AxiLiteWriteMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
