@@ -2,21 +2,19 @@
 --                                                             --
 -----------------------------------------------------------------
 --
---      Max11202AxilMaster.vhd -
+--      Max11202axilMaster.vhd -
 --
 --      Copyright(c) SLAC National Accelerator Laboratory 2000
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 3/27/2018 11:37:16 AM
+--      Last change: JO 4/18/2018 4:08:02 PM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
 -------------------------------------------------------------------------------
 -- File       : AxiMax11202Master.vhd
 -- From           : AxiSpiMaster by
--- Author     :     Benjamin Reese  <bareese@slac.stanford.edu>
---            :     Uros Legat Modified <ulegat@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-01-12
 -- Last update: 2018-03-27
@@ -36,10 +34,6 @@
 -- 4 -- Read, leave Dout High, Sleep, 25-1/2 Clock ticks.
 --      Calibration and conversion start when the Clock goes low.
 --
--- 7/18/17 jjo
--- I am going to start with only mode 2, free runing with calibration.
--- Rate is 208ms + update time ~5Hz
--- but leaving the hooks in to do the other modes
 --
 -------------------------------------------------------------------------------
 -- This file is part of 'SLAC Firmware Standard Library'.
@@ -52,8 +46,8 @@
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
 
 library unisim;
 use unisim.vcomponents.all;
@@ -68,100 +62,82 @@ entity Max11202AxilMaster is
     SERIAL_SCLK_PERIOD_G : real            := 1.0E-6
     );
   port (
-    axiClk : in sl;
-    axiRst : in sl;
+    axilClk : in sl;
+    axilRst : in sl;
 
-    axiReadMaster  : in  AxiLiteReadMasterType;
-    axiReadSlave   : out AxiLiteReadSlaveType;
-    axiWriteMaster : in  AxiLiteWriteMasterType;
-    axiWriteSlave  : out AxiLiteWriteSlaveType;
+    axilReadMaster  : in  AxiLiteReadMasterType;
+    axilReadSlave   : out AxiLiteReadSlaveType;
+    axilWriteMaster : in  AxiLiteWriteMasterType;
+    axilWriteSlave  : out AxiLiteWriteSlaveType;
+
+    -- Start Conversion
+    StartConv       : in    sl;
 
     coreSclk : out sl;
     coreSDin : in  slv(2 downto 0)
     );
-end entity Max11202AxilMaster;
+end entity Max11202axilMaster;
 
-architecture rtl of Max11202AxilMaster is
-
-  signal rdEn : sl;
+architecture rtl of Max11202axilMaster is
 
   type data32 is array (2 downto 0) of slv(31 downto 0);
 
   signal rdData : data32;
 
-  type StateType is (WAIT_AXI_TXN_S, WAIT_CYCLE_S, WAIT_SERIAL_TXN_DONE_S);
+  type StateType is (WAIT_axil_TXN_S, WAIT_CYCLE_S, WAIT_SERIAL_TXN_DONE_S);
 
   -- Registers
   type RegType is record
     state         : StateType;
-    axiReadSlave  : AxiLiteReadSlaveType;
-    axiWriteSlave : AxiLiteWriteSlaveType;
+    axilReadSlave  : AxilLiteReadSlaveType;
+    axilWriteSlave : AxilLiteWriteSlaveType;
     -- Adc Core Inputs
     wrEn          : sl;
   end record RegType;
 
   constant REG_INIT_C : RegType := (
-    state         => WAIT_AXI_TXN_S,
-    axiReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
-    axiWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C,
-    wrEn          => '0');
+    axilReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
+    axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C
+    );
 
   signal r   : RegType := REG_INIT_C;
   signal rin : RegType;
 
 begin
 
-  comb : process (axiReadMaster, axiRst, axiWriteMaster, r, rdData, rdEn) is
+  comb : process (axilReadMaster, axilRst, axilWriteMaster, r, rdData, rdEn) is
     variable v         : RegType;
-    variable axiStatus : AxiLiteStatusType;
+    variable axilStatus : AxiLiteStatusType;
+    variable RAddr : integer;
   begin
-    v := r;
+	 v		:= r;
+    RAddr := to_integer(unsigned(axilReadMaster.araddr(3 downto 2)));
 
-    axiSlaveWaitTxn(axiWriteMaster, axiReadMaster, v.axiWriteSlave, v.axiReadSlave, axiStatus);
+    -- Determine the transaction type
+    axilSlaveWaitTxn(axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave, axilStatus);
 
-    case (r.state) is
-      when WAIT_AXI_TXN_S =>
 
-        if (axiStatus.readEnable = '1') then
-          -- In some modes, setting wren will cause the serial clock to drop,
-          -- initiating a calibration and convert depending on the mode.
-          -- then Rden will drop until the conversion is complete
-          v.wrEn  := '1';
-          v.state := WAIT_CYCLE_S;
+    -- Check for a read request
+    if (axilStatus.readEnable = '1') then
+      v.axilReadSlave.rdata := RdData(RAddr);
+      -- Send AXI-Lite Response
+      axilSlaveReadResponse(v.axilReadSlave, axil_RESP_OK_C);
+    end if;
 
-        end if;
-
-      when WAIT_CYCLE_S =>
-        -- Wait 1 cycle for rdEn to drop
-        v.wrEn  := '0';
-        v.state := WAIT_SERIAL_TXN_DONE_S;
-
-      when WAIT_SERIAL_TXN_DONE_S =>
-
-        if (rdEn = '1') then
-          v.state              := WAIT_AXI_TXN_S;
-          v.axiReadSlave.rdata := rddata(conv_integer(axiReadMaster.araddr));
-          axiSlaveReadResponse(v.axiReadSlave);
-
-        end if;
-
-      when others => null;
-    end case;
-
-    if (axiRst = '1') then
+    if (axilRst = '1') then
       v := REG_INIT_C;
     end if;
 
     rin <= v;
 
-    axiWriteSlave <= r.axiWriteSlave;
-    axiReadSlave  <= r.axiReadSlave;
-
+    axilWriteSlave <= r.axilWriteSlave;
+    axilReadSlave  <= r.axilReadSlave;
+	 
   end process comb;
 
-  seq : process (axiClk) is
+  seq : process (axilClk) is
   begin
-    if (rising_edge(axiClk)) then
+    if (rising_edge(axilClk)) then
       r <= rin after TPD_G;
     end if;
   end process seq;
@@ -172,13 +148,12 @@ begin
       CLK_PERIOD_G         => CLK_PERIOD_G,          -- 8.0E-9,
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
-      clk     => axiClk,
-      Rst     => axiRst,
-      wrEn    => r.wrEn,
-      rdEn    => rdEn,
+      clk     => axilClk,
+      Rst     => axilRst,
       rdDataA => rdData(0),
       rdDataB => rdData(1),
       rdDataC => rdData(2),
+		StartConv => StartConv,
       Sclk    => coreSclk,
       Sdin    => coreSDin
       );

@@ -40,7 +40,7 @@ class Fpga(pr.Device):
             expand  = False,
         ))
 
-        for i in range(8):
+        for i in range(9):
             self.add(Channel(
                 name   = ('Channel[%d]' % i),
                 offset = (1*coreStride) + (appStride * (1+i)),

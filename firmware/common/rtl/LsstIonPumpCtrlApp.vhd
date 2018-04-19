@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 3/27/2018 11:31:01 AM
+--      Last change: JO 4/19/2018 8:43:38 AM
 --
 -------------------------------------------------------------------------------
 -- File       : lsst-ion-pump-ps-contoller.vhd
@@ -88,13 +88,13 @@ architecture Behavioral of LsstIonPumpCtrlApp is
   -- AXI Lite Config and Signals
   -------------------------------------------------------------------------------------------------
 
-  constant FRONTEND_INDEX_C : natural := 0;
+  constant REGISTER_INDEX_C : natural := 0;
   constant BOARD_INDEX_C : natural := 1;
 
   constant NUM_AXI_MASTERS_C : natural := 10; -- 1 Register, 9 Front Ends
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
-    FRONTEND_INDEX_C   => (
+    REGISTER_INDEX_C   => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_0000",
       addrBits      => 12,
       connectivity  => X"0001"),
@@ -103,35 +103,35 @@ architecture Behavioral of LsstIonPumpCtrlApp is
       addrBits      => 12,
       connectivity  => X"0001"),
     BOARD_INDEX_C+1 => (
-      baseAddr      => AXI_BASE_ADDR_G + x"0000_1000",
-      addrBits      => 12,
-      connectivity  => X"0001"),
-    BOARD_INDEX_C+2 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_2000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+3 => (
+    BOARD_INDEX_C+2 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_3000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+4 => (
+    BOARD_INDEX_C+3 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_4000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+5 => (
+    BOARD_INDEX_C+4 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_5000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+6 => (
+    BOARD_INDEX_C+5 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_6000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+7 => (
+    BOARD_INDEX_C+6 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_7000",
       addrBits      => 12,
       connectivity  => X"0001"),
-    BOARD_INDEX_C+8 => (
+    BOARD_INDEX_C+7 => (
       baseAddr      => AXI_BASE_ADDR_G + x"0000_8000",
+      addrBits      => 12,
+      connectivity  => X"0001"),
+    BOARD_INDEX_C+8 => (
+      baseAddr      => AXI_BASE_ADDR_G + x"0000_9000",
       addrBits      => 12,
       connectivity  => X"0001")
     );
@@ -174,10 +174,10 @@ begin
     -- AXI-Lite Interface
     axilClk         => axilClk,
     axilRst         => axilRst,  
-    axilReadMaster  => LocAxilReadMasters(FRONTEND_INDEX_C),
-    axilReadSlave   => LocAxilReadSlaves(FRONTEND_INDEX_C),
-    axilWriteMaster => LocAxilWriteMasters(FRONTEND_INDEX_C),
-    axilWriteSlave  => LocAxilWriteSlaves(FRONTEND_INDEX_C),
+    axilReadMaster  => LocAxilReadMasters(REGISTER_INDEX_C),
+    axilReadSlave   => LocAxilReadSlaves(REGISTER_INDEX_C),
+    axilWriteMaster => LocAxilWriteMasters(REGISTER_INDEX_C),
+    axilWriteSlave  => LocAxilWriteSlaves(REGISTER_INDEX_C),
 
 -- Ion Pump Control Board Mode bits
     iMode => iMode,        -- HVPS in Current Limit Mode
@@ -194,7 +194,7 @@ begin
     uFrontEnd : entity work.FrontEndBoard
       generic map (
         TPD_G            => 1 ns,
-        AXI_BASE_ADDR_G  => AXI_CROSSBAR_MASTERS_CONFIG_C(I).baseAddr,
+        AXI_BASE_ADDR_G  => AXI_CROSSBAR_MASTERS_CONFIG_C(BOARD_INDEX_C+I).baseAddr,
         CLK_PERIOD_G     => 8.0E-9      -- 156Mhz
         )
       port map (
