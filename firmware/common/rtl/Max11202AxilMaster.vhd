@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 4/19/2018 9:23:14 AM
+--      Last change: JO 4/19/2018 11:16:48 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
@@ -17,7 +17,7 @@
 -- From           : AxiSpiMaster by
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-01-12
--- Last update: 2018-03-27
+-- Last update: 2018-04-19
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -53,13 +53,15 @@ library unisim;
 use unisim.vcomponents.all;
 
 use work.StdRtlPkg.all;
+use work.AxiStreamPkg.all;
+
 use work.AxiLitePkg.all;
 
 entity Max11202AxilMaster is
   generic (
-    TPD_G                : time            := 1 ns;
-    CLK_PERIOD_G         : real            := 8.0E-9;
-    SERIAL_SCLK_PERIOD_G : real            := 1.0E-6
+    TPD_G                : time := 1 ns;
+    CLK_PERIOD_G         : real := 8.0E-9;
+    SERIAL_SCLK_PERIOD_G : real := 1.0E-6
     );
   port (
     axilClk : in sl;
@@ -71,7 +73,7 @@ entity Max11202AxilMaster is
     axilWriteSlave  : out AxiLiteWriteSlaveType;
 
     -- Start Conversion
-    StartConv       : in    sl;
+    StartConv : in sl;
 
     coreSclk : out sl;
     coreSDin : in  slv(2 downto 0)
@@ -88,14 +90,13 @@ architecture rtl of Max11202axilMaster is
 
   -- Registers
   type RegType is record
-    state         : StateType;
-    axilReadSlave  : AxilLiteReadSlaveType;
-    axilWriteSlave : AxilLiteWriteSlaveType;
-    -- Adc Core Inputs
-    wrEn          : sl;
+    state          : StateType;
+    axilReadSlave  : AxiLiteReadSlaveType;
+    axilWriteSlave : AxiLiteWriteSlaveType;
   end record RegType;
 
   constant REG_INIT_C : RegType := (
+    state          => WAIT_axil_TXN_S,
     axilReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
     axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C
     );
@@ -105,22 +106,22 @@ architecture rtl of Max11202axilMaster is
 
 begin
 
-  comb : process (axilReadMaster, axilRst, axilWriteMaster, r, rdData, rdEn) is
-    variable v         : RegType;
+  comb : process (axilReadMaster, axilRst, axilWriteMaster, r, rdData) is
+    variable v          : RegType;
     variable axilStatus : AxiLiteStatusType;
-    variable RAddr : integer;
+    variable RAddr      : integer;
   begin
-	 v		:= r;
+    v     := r;
     RAddr := to_integer(unsigned(axilReadMaster.araddr(3 downto 2)));
 
     -- Determine the transaction type
-    axilSlaveWaitTxn(axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave, axilStatus);
+    axiSlaveWaitTxn(axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave, axilStatus);
 
     -- Check for a read request
     if (axilStatus.readEnable = '1') then
       v.axilReadSlave.rdata := RdData(RAddr);
       -- Send AXI-Lite Response
-      axilSlaveReadResponse(v.axilReadSlave, axil_RESP_OK_C);
+      axiSlaveReadResponse(v.axilReadSlave, AXI_RESP_OK_C);
     end if;
 
     if (axilRst = '1') then
@@ -131,7 +132,7 @@ begin
 
     axilWriteSlave <= r.axilWriteSlave;
     axilReadSlave  <= r.axilReadSlave;
-	 
+
   end process comb;
 
   seq : process (axilClk) is
@@ -147,13 +148,13 @@ begin
       CLK_PERIOD_G         => CLK_PERIOD_G,          -- 8.0E-9,
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
-      clk     => axilClk,
-      Rst     => axilRst,
-      rdDataA => rdData(0),
-      rdDataB => rdData(1),
-      rdDataC => rdData(2),
-		StartConv => StartConv,
-      Sclk    => coreSclk,
-      Sdin    => coreSDin
+      clk       => axilClk,
+      Rst       => axilRst,
+      rdDataA   => rdData(0),
+      rdDataB   => rdData(1),
+      rdDataC   => rdData(2),
+      StartConv => StartConv,
+      Sclk      => coreSclk,
+      Sdin      => coreSDin
       );
 end architecture rtl;

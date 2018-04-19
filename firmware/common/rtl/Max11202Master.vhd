@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 3:10:01 PM
---      Last change: JO 4/19/2018 8:37:38 AM
+--      Last change: JO 4/19/2018 11:01:28 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : 
@@ -19,7 +19,7 @@
 -- Author     : Larry Ruckman  <ruckman@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2013-05-24
--- Last update: 2018-03-27
+-- Last update: 2018-04-19
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -49,15 +49,15 @@ entity max11202Master is
     SERIAL_SCLK_PERIOD_G : real := 1.0E-6);  -- 1 MHz
   port (
     --Global Signals
-    clk     : in  sl;
-    Rst     : in  sl;
+    clk       : in  sl;
+    Rst       : in  sl;
     -- Parallel interface
-	StartConv : in sl;
-    rdDataA : out slv(31 downto 0);
-    rdDataB : out slv(31 downto 0);
-    rdDataC : out slv(31 downto 0);
-    Sclk    : out sl;
-    Sdin    : in  slv(2 downto 0)
+    StartConv : in  sl;
+    rdDataA   : out slv(31 downto 0);
+    rdDataB   : out slv(31 downto 0);
+    rdDataC   : out slv(31 downto 0);
+    Sclk      : out sl;
+    Sdin      : in  slv(2 downto 0)
     );
 end max11202Master;
 
@@ -72,14 +72,14 @@ architecture rtl of max11202Master is
 
   type StateType is (
     IDLE_S,
-	 WAIT_READY_S,
+    WAIT_READY_S,
     SHIFT_S,
     SAMPLE_S,
     DONE_S);
 
   type RegType is record
     state       : StateType;
-	 syncSdin	 : slv(2 downto 0);
+    syncSdin    : slv(2 downto 0);
     rdData      : data32;
     dataCounter : slv(25 downto 0);
     sclkCounter : slv(SCLK_COUNTER_SIZE_C-1 downto 0);
@@ -88,7 +88,7 @@ architecture rtl of max11202Master is
 
   constant REG_INIT_C : RegType := (
     state       => IDLE_S,
-	 syncSdin	 => "000",
+    syncSdin    => "000",
     rdData      => (others => x"00000000"),
     dataCounter => (others => '0'),
     sclkCounter => (others => '0'),
@@ -100,31 +100,31 @@ architecture rtl of max11202Master is
 
 begin
 
-  comb : process (r, Rst, wrEn, sdin, startConv) is
+  comb : process (r, Rst, sdin, startConv) is
     variable v : RegType;
   begin
-    v := r;
-	v.SyncSdin := Sdin;
+    v          := r;
+    v.SyncSdin := Sdin;
 
     case (r.state) is
       when IDLE_S =>
         v.dataCounter := (others => '0');
         v.sclkCounter := (others => '0');
-          v.rdData(0)   :=  (others => '0');
-          v.rdData(1)   :=  (others => '0');
-          v.rdData(2)   :=  (others => '0');
+        v.rdData(0)   := (others => '0');
+        v.rdData(1)   := (others => '0');
+        v.rdData(2)   := (others => '0');
 
         if (StartConv = '1') then
-		  -- Exit from sleep state by dropping clock, start convert
-          v.Sclk        := '0';
-			 v.state := WAIT_READY_S;
+          -- Exit from sleep state by dropping clock, start convert
+          v.Sclk  := '0';
+          v.state := WAIT_READY_S;
         end if;
-		  
-		  when WAIT_READY_S =>
-		-- wait for all three ADC to be ready
-          if (r.SyncSdin = "000") then        -- All ADCs are ready
-            v.state := Shift_S;
-          end if;
+
+      when WAIT_READY_S =>
+        -- wait for all three ADC to be ready
+        if (r.SyncSdin = "000") then    -- All ADCs are ready
+          v.state := Shift_S;
+        end if;
 
       when SHIFT_S =>
         -- Wait half a clock period then shift out the next data bit
@@ -147,11 +147,11 @@ begin
 
           v.dataCounter := r.dataCounter + 1;
           if (r.dataCounter = 23) then
-				v.Sclk		  := '1';
-				v.state			:= DONE_S;
-				else
-				v.Sclk := '0';
-          v.state       := SHIFT_S;
+            v.Sclk  := '1';
+            v.state := DONE_S;
+          else
+            v.Sclk  := '0';
+            v.state := SHIFT_S;
 
           end if;
         end if;
@@ -160,9 +160,9 @@ begin
         v.sclkCounter := r.sclkCounter + 1;
         if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
           v.sclkCounter := (others => '0');
-    rdDataA <= r.rdData(0);
-    rdDataB <= r.rdData(1);
-    rdDataC <= r.rdData(2);
+          rdDataA       <= r.rdData(0);
+          rdDataB       <= r.rdData(1);
+          rdDataC       <= r.rdData(2);
           v.state       := IDLE_S;
         end if;
       when others => null;

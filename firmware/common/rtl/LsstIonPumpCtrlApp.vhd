@@ -8,13 +8,13 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 4/19/2018 9:05:57 AM
+--      Last change: JO 4/19/2018 10:32:52 AM
 --
 -------------------------------------------------------------------------------
 -- File       : lsst-ion-pump-ps-contoller.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2017-02-04
--- Last update: 2018-03-27
+-- Last update: 2018-04-19
 -------------------------------------------------------------------------------
 -- Description: Firmware Target's Top Level
 -- 
@@ -42,9 +42,9 @@ use work.AxiLitePkg.all;
 
 entity LsstIonPumpCtrlApp is
   generic (
-    TPD_G            : time             := 1ns;
-    AXI_BASE_ADDR_G  : slv(31 downto 0) := x"00000000";
-    AXI_CLK_FREQ_C   : real             := 156.0E+6
+    TPD_G           : time             := 1ns;
+    AXI_BASE_ADDR_G : slv(31 downto 0) := x"00000000";
+    AXI_CLK_FREQ_C  : real             := 125.0E+6
 
     );
   port (
@@ -89,11 +89,11 @@ architecture Behavioral of LsstIonPumpCtrlApp is
   -------------------------------------------------------------------------------------------------
 
   constant REGISTER_INDEX_C : natural := 0;
-  constant BOARD_INDEX_C : natural := 1;
+  constant BOARD_INDEX_C    : natural := 1;
 
-  constant NUM_AXI_MASTERS_C : natural := 10; -- 1 Register, 9 Front Ends
+  constant NUM_AXI_MASTERS_C : natural := 10;  -- 1 Register, 9 Front Ends
 
-  constant AXI_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0):= genAxiLiteConfig(NUM_AXI_MASTERS_C, AXI_BASE_ADDR_G, 16, 12);
+  constant AXI_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXI_MASTERS_C, AXI_BASE_ADDR_G, 16, 12);
 
   signal locAxilWriteMasters : AxiLiteWriteMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
@@ -123,38 +123,38 @@ begin
       mAxiWriteSlaves     => LocAxilWriteSlaves,
       mAxiReadMasters     => LocAxilReadMasters,
       mAxiReadSlaves      => LocAxilReadSlaves
-		);
+      );
 
   Registers : entity work.IonPumpReg
-  generic map (
-    TPD_G            => TPD_G
-	 )
-  port map (
-    -- AXI-Lite Interface
-    axilClk         => axilClk,
-    axilRst         => axilRst,  
-    axilReadMaster  => LocAxilReadMasters(REGISTER_INDEX_C),
-    axilReadSlave   => LocAxilReadSlaves(REGISTER_INDEX_C),
-    axilWriteMaster => LocAxilWriteMasters(REGISTER_INDEX_C),
-    axilWriteSlave  => LocAxilWriteSlaves(REGISTER_INDEX_C),
+    generic map (
+      TPD_G => TPD_G
+      )
+    port map (
+      -- AXI-Lite Interface
+      axilClk         => axilClk,
+      axilRst         => axilRst,
+      axilReadMaster  => LocAxilReadMasters(REGISTER_INDEX_C),
+      axilReadSlave   => LocAxilReadSlaves(REGISTER_INDEX_C),
+      axilWriteMaster => LocAxilWriteMasters(REGISTER_INDEX_C),
+      axilWriteSlave  => LocAxilWriteSlaves(REGISTER_INDEX_C),
 
 -- Ion Pump Control Board Mode bits
-    iMode => iMode,        -- HVPS in Current Limit Mode
-    vMode => vMode,        -- HVPS in Voltage Limit Mode
-    pMode => pMode,         -- HVPS in Power Limit Mode
+      iMode => iMode,                   -- HVPS in Current Limit Mode
+      vMode => vMode,                   -- HVPS in Voltage Limit Mode
+      pMode => pMode,                   -- HVPS in Power Limit Mode
 
 -- Ion Pump Enable
-    Enable => Enable        -- Enable HVPS
+      Enable => Enable                  -- Enable HVPS
 
-    );
-  
+      );
+
 
   genFrontEnd : for I in 0 to 8 generate
     uFrontEnd : entity work.FrontEndBoard
       generic map (
-        TPD_G            => 1 ns,
-        AXI_BASE_ADDR_G  => AXI_CROSSBAR_MASTERS_CONFIG_C(BOARD_INDEX_C+I).baseAddr,
-        CLK_PERIOD_G     => 8.0E-9      -- 156Mhz
+        TPD_G           => 1 ns,
+        AXI_BASE_ADDR_G => AXI_CROSSBAR_MASTERS_CONFIG_C(BOARD_INDEX_C+I).baseAddr,
+        CLK_PERIOD_G    => 8.0E-9       -- 125Mhz
         )
       port map (
         axilClk => axilClk,
@@ -177,7 +177,7 @@ begin
         dacSclk  => dacSclk(I),         -- Clock for the Setpoint DACs
         iProgCsL => iProgCsL(I),        -- Chip Enable for Current DAC
         vProgCsL => vProgCsL(I),        -- Chip Enable for Voltage DAC
-        pProgCsL => pProgCsL(I)        -- Chip Enable for Power DAC
+        pProgCsL => pProgCsL(I)         -- Chip Enable for Power DAC
 
         );
   end generate;

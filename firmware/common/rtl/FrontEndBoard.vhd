@@ -14,7 +14,7 @@
 -- File       : FrontEndBoardvhd
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2017-02-04
--- Last update: 2018-03-27
+-- Last update: 2018-04-19
 -------------------------------------------------------------------------------
 -- Description: Firmware Target's Top Level
 -- 
@@ -40,9 +40,9 @@ use work.AxiLitePkg.all;
 
 entity FrontEndBoard is
   generic (
-    TPD_G            : time             := 1 ns;
-    AXI_BASE_ADDR_G  : slv(31 downto 0) := x"00000000";
-    CLK_PERIOD_G     : real             := 6.4E-9  -- 156Mhz
+    TPD_G           : time             := 1 ns;
+    AXI_BASE_ADDR_G : slv(31 downto 0) := x"00000000";
+    CLK_PERIOD_G    : real             := 6.4E-9  -- 156Mhz
     );
   port (
 
@@ -66,7 +66,7 @@ entity FrontEndBoard is
     dacSclk  : out sl;                  -- Clock for the Setpoint DACs
     iProgCsL : out sl;                  -- Chip Enable for Current DAC
     vProgCsL : out sl;                  -- Chip Enable for Voltage DAC
-    pProgCsL : out sl                  -- Chip Enable for Power DAC
+    pProgCsL : out sl                   -- Chip Enable for Power DAC
 
     );
 end entity FrontEndBoard;
@@ -103,8 +103,8 @@ architecture Behavioral of FrontEndBoard is
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadMasters  : AxiLiteReadMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
-  
-  signal iadcSclk            : slv(2 downto 0);
+
+  signal iadcSclk : slv(2 downto 0);
 
 begin
 

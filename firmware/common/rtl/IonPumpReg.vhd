@@ -29,8 +29,8 @@ use work.AxiLitePkg.all;
 
 entity IonPumpReg is
   generic (
-    TPD_G            : time            := 1 ns
-	 );
+    TPD_G : time := 1 ns
+    );
   port (
     -- AXI-Lite Interface
     axilClk         : in  sl;
@@ -59,7 +59,7 @@ architecture Behavioral of IonPumpReg is
   end record;
 
   constant REG_INIT_C : RegType := (
-    ChannelEn      => (Others => '0'),
+    ChannelEn      => (others => '0'),
     axilReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
     axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C);
 
@@ -68,21 +68,21 @@ architecture Behavioral of IonPumpReg is
 
 begin
 
-  comb : process (iMode, vMode, pMode,  axilReadMaster, axilRst,
+  comb : process (iMode, vMode, pMode, axilReadMaster, axilRst,
                   axilWriteMaster, r) is
     variable v      : RegType;
     variable axilEp : AxiLiteEndpointType;
   begin
     -- Latch the current value
-    v             := r;
+    v := r;
     -- Determine the transaction type
     axiSlaveWaitTxn(axilEp, axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave);
 
     -- Register Mapping
     axiSlaveRegister(axilEp, X"00", 0, v.ChannelEn);  -- Register 0 Enable
-    axiSlaveRegisterR(axilEp, X"04", 0, iMode);  -- IMode Status
-    axiSlaveRegisterR(axilEp, X"08", 0, vMode);   -- VMode Status
-    axiSlaveRegisterR(axilEp, X"0C", 0, pMode);  --  PMode Status
+    axiSlaveRegisterR(axilEp, X"04", 0, iMode);       -- IMode Status
+    axiSlaveRegisterR(axilEp, X"08", 0, vMode);       -- VMode Status
+    axiSlaveRegisterR(axilEp, X"0C", 0, pMode);       --  PMode Status
 
     -- Closeout the txn
     axiSlaveDefault(axilEp, v.axilWriteSlave, v.axilReadSlave);
@@ -98,7 +98,7 @@ begin
     -- Outputs 
     axilReadSlave  <= r.axilReadSlave;
     axilWriteSlave <= r.axilWriteSlave;
-    Enable           <= r.ChannelEn;
+    Enable         <= r.ChannelEn;
 
   end process;
 
