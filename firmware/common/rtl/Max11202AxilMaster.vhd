@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 9:35:50 AM
---      Last change: JO 4/18/2018 4:08:02 PM
+--      Last change: JO 4/19/2018 9:23:14 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : Axi lite interface for a Max11202 ADC
@@ -115,7 +115,6 @@ begin
 
     -- Determine the transaction type
     axilSlaveWaitTxn(axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave, axilStatus);
-
 
     -- Check for a read request
     if (axilStatus.readEnable = '1') then
