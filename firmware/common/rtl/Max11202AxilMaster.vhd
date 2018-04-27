@@ -64,13 +64,13 @@ entity Max11202AxilMaster is
     SERIAL_SCLK_PERIOD_G : real := 1.0E-6
     );
   port (
-    axilClk : in sl;
-    axilRst : in sl;
+    axiClk : in sl;
+    axiRst : in sl;
 
-    axilReadMaster  : in  AxiLiteReadMasterType;
-    axilReadSlave   : out AxiLiteReadSlaveType;
-    axilWriteMaster : in  AxiLiteWriteMasterType;
-    axilWriteSlave  : out AxiLiteWriteSlaveType;
+    axiReadMaster  : in  AxiLiteReadMasterType;
+    axiReadSlave   : out AxiLiteReadSlaveType;
+    axiWriteMaster : in  AxiLiteWriteMasterType;
+    axiWriteSlave  : out AxiLiteWriteSlaveType;
 
     -- Start Conversion
     StartConv : in sl;
@@ -91,14 +91,14 @@ architecture rtl of Max11202axilMaster is
   -- Registers
   type RegType is record
     state          : StateType;
-    axilReadSlave  : AxiLiteReadSlaveType;
-    axilWriteSlave : AxiLiteWriteSlaveType;
+    axiReadSlave  : AxiLiteReadSlaveType;
+    axiWriteSlave : AxiLiteWriteSlaveType;
   end record RegType;
 
   constant REG_INIT_C : RegType := (
     state          => WAIT_axil_TXN_S,
-    axilReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
-    axilWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C
+    axiReadSlave  => AXI_LITE_READ_SLAVE_INIT_C,
+    axiWriteSlave => AXI_LITE_WRITE_SLAVE_INIT_C
     );
 
   signal r   : RegType := REG_INIT_C;
@@ -106,38 +106,38 @@ architecture rtl of Max11202axilMaster is
 
 begin
 
-  comb : process (axilReadMaster, axilRst, axilWriteMaster, r, rdData) is
+  comb : process (axiReadMaster, axiRst, axiWriteMaster, r, rdData) is
     variable v          : RegType;
     variable axilStatus : AxiLiteStatusType;
     variable RAddr      : integer;
   begin
     v     := r;
-    RAddr := to_integer(unsigned(axilReadMaster.araddr(3 downto 2)));
+    RAddr := to_integer(unsigned(axiReadMaster.araddr(3 downto 2)));
 
     -- Determine the transaction type
-    axiSlaveWaitTxn(axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave, axilStatus);
+    axiSlaveWaitTxn(axiWriteMaster, axiReadMaster, v.axiWriteSlave, v.axiReadSlave, axilStatus);
 
     -- Check for a read request
     if (axilStatus.readEnable = '1') then
-      v.axilReadSlave.rdata := RdData(RAddr);
+      v.axiReadSlave.rdata := RdData(RAddr);
       -- Send AXI-Lite Response
-      axiSlaveReadResponse(v.axilReadSlave, AXI_RESP_OK_C);
+      axiSlaveReadResponse(v.axiReadSlave, AXI_RESP_OK_C);
     end if;
 
-    if (axilRst = '1') then
+    if (axiRst = '1') then
       v := REG_INIT_C;
     end if;
 
     rin <= v;
 
-    axilWriteSlave <= r.axilWriteSlave;
-    axilReadSlave  <= r.axilReadSlave;
+    axiWriteSlave <= r.axiWriteSlave;
+    axiReadSlave  <= r.axiReadSlave;
 
   end process comb;
 
-  seq : process (axilClk) is
+  seq : process (axiClk) is
   begin
-    if (rising_edge(axilClk)) then
+    if (rising_edge(axiClk)) then
       r <= rin after TPD_G;
     end if;
   end process seq;
@@ -148,8 +148,8 @@ begin
       CLK_PERIOD_G         => CLK_PERIOD_G,          -- 8.0E-9,
       SERIAL_SCLK_PERIOD_G => SERIAL_SCLK_PERIOD_G)  --ite(SIMULATION_G, 100.0E-9, 100.0E-6))
     port map (
-      clk       => axilClk,
-      Rst       => axilRst,
+      clk       => axiClk,
+      Rst       => axiRst,
       rdDataA   => rdData(0),
       rdDataB   => rdData(1),
       rdDataC   => rdData(2),

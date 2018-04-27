@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 3/27/2018 11:02:44 AM
+--      Last change: JO 4/27/2018 9:30:09 AM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -53,6 +53,9 @@ entity FrontEndBoard is
     axilReadSlave   : out AxiLiteReadSlaveType;
     axilWriteMaster : in  AxiLiteWriteMasterType;
     axilWriteSlave  : out AxiLiteWriteSlaveType;
+
+    -- Start Conversion
+    StartConv : in sl;
 
 -- Controller IO
 -- Ion Pump Control Board ADC SPI Interfaces
@@ -137,7 +140,6 @@ begin
       mAxiReadMasters     => LocAxilReadMasters,
       mAxiReadSlaves      => LocAxilReadSlaves);
 
-
   adcIn(0) <= iMonDin;
   adcIn(1) <= vMonDin;
   adcIn(2) <= pMonDin;
@@ -146,7 +148,7 @@ begin
     generic map (
       TPD_G             => 1 ns,
       ADDRESS_SIZE_G    => 0,
-      DATA_SIZE_G       => 16,
+      DATA_SIZE_G       => 24,
       MODE_G            => "WO",    -- Or "WO" (write only),  "RO" (read only)
       CPHA_G            => '0',
       CPOL_G            => '0',
@@ -183,6 +185,9 @@ begin
       axiReadSlave   => locAxilReadSlaves(ADC_INDEX_C),
       axiWriteMaster => locAxilWriteMasters(ADC_INDEX_C),
       axiWriteSlave  => locAxilWriteSlaves(ADC_INDEX_C),
+
+    -- Start Conversion
+    StartConv => StartConv,
 
       coreSclk => ADCSClk,
       coreSDin => adcIn

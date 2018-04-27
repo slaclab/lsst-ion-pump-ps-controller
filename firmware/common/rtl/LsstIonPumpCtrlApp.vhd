@@ -93,12 +93,15 @@ architecture Behavioral of LsstIonPumpCtrlApp is
 
   constant NUM_AXI_MASTERS_C : natural := 10;  -- 1 Register, 9 Front Ends
 
-  constant AXI_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXI_MASTERS_C, AXI_BASE_ADDR_G, 16, 12);
+  constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXI_MASTERS_C, AXI_BASE_ADDR_G, 16, 12);
 
   signal locAxilWriteMasters : AxiLiteWriteMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadMasters  : AxiLiteReadMasterArray(NUM_AXI_MASTERS_C-1 downto 0);
   signal locAxilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXI_MASTERS_C-1 downto 0);
+  
+  signal StartConv : sl;
+  signal StartRead : sl;
 
 begin
 
@@ -124,6 +127,32 @@ begin
       mAxiReadMasters     => LocAxilReadMasters,
       mAxiReadSlaves      => LocAxilReadSlaves
       );
+
+  u_StartConv : entity work.Heartbeat
+    generic map(
+      TPD_G        => 1 ns,
+      USE_DSP48_G  => "no",
+      PERIOD_IN_G  => 8.0E-9,           --units of seconds
+      PERIOD_OUT_G => 1.0E-0
+      )                                 --units of seconds
+    port map (
+      clk => axilClk,
+      rst => axilRst,
+      o   => StartRead
+      );
+
+
+u_LE : entity work.SynchronizerEdge 
+   generic map (
+       BYPASS_SYNC_G  => true  -- Bypass Synchronizer module for synchronous data configuration 
+       )      
+   port map (
+      clk         => axilClk,                     -- clock to be SYNC'd to
+      rst         => axilRst,    -- Optional reset
+      dataIn      => StartRead,                      -- Data to be 'synced'
+      risingEdge => StartConv                      -- Rising edge detected
+);                       
+
 
   Registers : entity work.IonPumpReg
     generic map (
@@ -159,6 +188,8 @@ begin
       port map (
         axilClk => axilClk,
         axilRst => axilRst,
+        
+        StartConv => StartConv,
 
         axiLReadMaster  => LocAxilReadMasters(BOARD_INDEX_C+I),
         axiLReadSlave   => LocAxilReadSlaves(BOARD_INDEX_C+I),

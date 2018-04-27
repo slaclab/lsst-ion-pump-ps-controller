@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/18/2017 3:10:01 PM
---      Last change: JO 4/19/2018 11:01:28 AM
+--      Last change: JO 4/27/2018 9:08:38 AM
 --
 -------------------------------------------------------------------------------
 -- Title      : 
@@ -45,7 +45,7 @@ use work.StdRtlPkg.all;
 entity max11202Master is
   generic (
     TPD_G                : time := 1 ns;
-    CLK_PERIOD_G         : real := 6.4E-9;
+    CLK_PERIOD_G         : real := 8.0E-9;
     SERIAL_SCLK_PERIOD_G : real := 1.0E-6);  -- 1 MHz
   port (
     --Global Signals
@@ -68,7 +68,7 @@ architecture rtl of max11202Master is
 
 
   -- Types
-  type data32 is array (2 downto 0) of slv(31 downto 0);
+  type data24 is array (2 downto 0) of slv(23 downto 0);
 
   type StateType is (
     IDLE_S,
@@ -80,7 +80,10 @@ architecture rtl of max11202Master is
   type RegType is record
     state       : StateType;
     syncSdin    : slv(2 downto 0);
-    rdData      : data32;
+    rdData      : data24;
+	 rdDataA		: slv(31 downto 0);
+	 rdDataB		: slv(31 downto 0);
+	 rdDataC  : slv(31 downto 0);
     dataCounter : slv(25 downto 0);
     sclkCounter : slv(SCLK_COUNTER_SIZE_C-1 downto 0);
     Sclk        : sl;
@@ -89,7 +92,10 @@ architecture rtl of max11202Master is
   constant REG_INIT_C : RegType := (
     state       => IDLE_S,
     syncSdin    => "000",
-    rdData      => (others => x"00000000"),
+    rdData      => (others => x"0000000"),
+	 rdDataA     => (others => '0'),
+	 rdDataB     => (others => '0'),
+	 rdDataC     => (others => '0'),
     dataCounter => (others => '0'),
     sclkCounter => (others => '0'),
     Sclk        => '0'
@@ -141,9 +147,9 @@ begin
         v.sclkCounter := r.sclkCounter + 1;
         if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
           v.sclkCounter := (others => '0');
-          v.rdData(0)   := r.rdData(0)(30 downto 0) & SDin(0);
-          v.rdData(1)   := r.rdData(1)(30 downto 0) & SDin(1);
-          v.rdData(2)   := r.rdData(2)(30 downto 0) & SDin(2);
+          v.rdData(0)   := r.rdData(0)(22 downto 0) & SDin(0);
+          v.rdData(1)   := r.rdData(1)(22 downto 0) & SDin(1);
+          v.rdData(2)   := r.rdData(2)(22 downto 0) & SDin(2);
 
           v.dataCounter := r.dataCounter + 1;
           if (r.dataCounter = 23) then
@@ -160,14 +166,24 @@ begin
         v.sclkCounter := r.sclkCounter + 1;
         if (r.sclkCounter = SERIAL_CLK_PERIOD_DIV2_CYCLES_C) then
           v.sclkCounter := (others => '0');
-          rdDataA       <= r.rdData(0);
-          rdDataB       <= r.rdData(1);
-          rdDataC       <= r.rdData(2);
+			 -- sign extend 24 bits to 32 bits
+          v.rdDataA       := r.rdData(0)(23) & r.rdData(0)(23) & r.rdData(0)(23) & r.rdData(0)(23) &
+									  r.rdData(0)(23) & r.rdData(0)(23) & r.rdData(0)(23) & r.rdData(0)(23) &
+									  r.rdData(0);
+          v.rdDataB       := r.rdData(1)(23) & r.rdData(1)(23) & r.rdData(1)(23) & r.rdData(1)(23) &
+									  r.rdData(1)(23) & r.rdData(1)(23) & r.rdData(1)(23) & r.rdData(1)(23) &
+									  r.rdData(1);
+          v.rdDataC       := r.rdData(2)(23) & r.rdData(2)(23) & r.rdData(2)(23) & r.rdData(2)(23) &
+									  r.rdData(2)(23) & r.rdData(2)(23) & r.rdData(2)(23) & r.rdData(2)(23) &
+									  r.rdData(2);
           v.state       := IDLE_S;
         end if;
       when others => null;
     end case;
 
+	 rdDataA <= r.rdDataA;
+	 rdDataB <= r.rdDataB;
+	 rdDataC <= r.rdDataC;
 
     if (Rst = '1') then
       v := REG_INIT_C;
