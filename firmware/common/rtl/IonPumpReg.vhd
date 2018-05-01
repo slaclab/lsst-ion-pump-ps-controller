@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 7/25/2017 1:03:24 PM
---      Last change: JO 3/27/2018 11:41:16 AM
+--      Last change: JO 5/1/2018 4:13:17 PM
 --
 -------------------------------------------------------------------------------
 -- This file is part of 'LSST Firmware'.
@@ -80,9 +80,9 @@ begin
 
     -- Register Mapping
     axiSlaveRegister(axilEp, X"00", 0, v.ChannelEn);  -- Register 0 Enable
-    axiSlaveRegisterR(axilEp, X"04", 0, iMode);       -- IMode Status
-    axiSlaveRegisterR(axilEp, X"08", 0, vMode);       -- VMode Status
-    axiSlaveRegisterR(axilEp, X"0C", 0, pMode);       --  PMode Status
+    axiSlaveRegisterR(axilEp, X"04", 0, not(iMode));       -- IMode Status
+    axiSlaveRegisterR(axilEp, X"08", 0, not(vMode));       -- VMode Status
+    axiSlaveRegisterR(axilEp, X"0C", 0, not(pMode));       --  PMode Status
 
     -- Closeout the txn
     axiSlaveDefault(axilEp, v.axilWriteSlave, v.axilReadSlave);

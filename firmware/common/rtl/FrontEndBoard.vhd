@@ -8,7 +8,7 @@
 --
 --      Author: Jeff Olsen
 --      Created on: 4/20/2017 2:04:46 PM
---      Last change: JO 4/27/2018 9:30:09 AM
+--      Last change: JO 5/1/2018 8:51:34 AM
 --
 -------------------------------------------------------------------------------
 -- File       : FrontEndBoardvhd
@@ -144,14 +144,14 @@ begin
   adcIn(1) <= vMonDin;
   adcIn(2) <= pMonDin;
 
-  uDacSpi : entity work.AxiSpiMaster
+  uDacSpi : entity work.Max5216Axil
     generic map (
       TPD_G             => 1 ns,
       ADDRESS_SIZE_G    => 0,
       DATA_SIZE_G       => 24,
       MODE_G            => "WO",    -- Or "WO" (write only),  "RO" (read only)
       CPHA_G            => '0',
-      CPOL_G            => '0',
+      CPOL_G            => '1',
       CLK_PERIOD_G      => 8.0E-9,      -- 125Mhz
       SPI_NUM_CHIPS_G   => 3,
       SPI_SCLK_PERIOD_G => 1.0E-6

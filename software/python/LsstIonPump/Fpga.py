@@ -58,33 +58,98 @@ class Channel(pr.Device):
             name    = 'CurrentLimit',
             offset  = 0x0,
             mode    = 'WO',
+            base = pr.UInt,
+            bitSize = 16,
         ))
+        
+        self.add(pr.LinkVariable(
+            name = 'Current',
+            dependencies = [self.CurrentLimit],
+            linkedGet = lambda: self.CurrentLimit.value()*16.0 / 65536.0,
+            linkedSet = lambda value, write: self.CurrentLimit.set(int(value/16.0*65536.0), write=write),
+            disp = '{:1.3f}',
+            ))
+        
         self.add(pr.RemoteVariable(
             name    = 'VoltageLimit',
+            hidden = False,
             offset  = 0x4,
             mode    = 'WO',
+            base = pr.UInt,
+            bitSize = 16,
         ))
+        self.add(pr.LinkVariable(
+            name = 'Voltage',
+            dependencies = [self.VoltageLimit],
+            linkedGet = lambda: self.VoltageLimit.value()*6.0 /65536.0 ,
+            linkedSet = lambda value, write: self.VoltageLimit.set(int(value/6.0*65536.0), write=write),
+            disp = '{:1.3f}',
+            ))
+        
         self.add(pr.RemoteVariable(
             name    = 'PowerLimit',
             offset  = 0x8,
             mode    = 'WO',
+            base = pr.UInt,
+            bitSize = 16,
         ))
+        
+        self.add(pr.LinkVariable(
+            name = 'Power',
+            dependencies = [self.PowerLimit],
+            linkedGet = lambda: self.PowerLimit.value()*10.0 /65536.0 ,
+            linkedSet = lambda value, write: self.PowerLimit.set(int(value/10.0*65536.0), write=write),
+            disp = '{:1.3f}',
+            ))
         self.add(pr.RemoteVariable(
-            name    = 'Current',
+            name    = 'CurrentRaw',
             offset  = 0x200,
             mode    = 'RO',
+            base = pr.UInt,
+            bitSize = 24,
         ))
+        self.add(pr.LinkVariable(
+            name = 'SupplyCurrent',
+            mode = 'RO',
+            units = 'mA',
+            variable = self.CurrentRaw,
+            linkedGet = lambda: self.CurrentRaw.value() *  2.0 * 16.0 / 16777215.0,
+            disp = '{:1.3f}',
+        ))
+ 
         self.add(pr.RemoteVariable(
-            name    = 'Voltage',
+            name    = 'VoltageRaw',
             offset  = 0x204,
             mode    = 'RO',
+            base = pr.UInt,
+            bitSize = 24,
         ))
+        
+        self.add(pr.LinkVariable(
+            name = 'SupplyVoltage',
+            mode = 'RO',
+            units = 'KV',
+            variable = self.VoltageRaw,
+            linkedGet = lambda: self.VoltageRaw.value() *  2.0 * 6.0 / 16777215.0,
+            disp = '{:1.3f}',
+        ))
+ 
         self.add(pr.RemoteVariable(
-            name    = 'Power',
+            name    = 'PowerRaw',
             offset  = 0x208,
             mode    = 'RO',
+            base = pr.UInt,
+            bitSize = 24,
         ))
 
+        self.add(pr.LinkVariable(
+            name = 'SupplyPower',
+            mode = 'RO',
+            units = 'W',
+            variable = self.PowerRaw,
+            linkedGet = lambda: self.PowerRaw.value() *  2.0 * 10.0 / 16777215.0,
+            disp = '{:1.3f}',
+        ))
 class CtrlReg(pr.Device):
     def __init__(self, 
                  name        = "CtrlReg",
