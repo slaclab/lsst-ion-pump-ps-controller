@@ -78,6 +78,12 @@ set_property -dict { PACKAGE_PIN A4     IOSTANDARD LVCMOS33 } [get_ports { ethTx
 set_property -dict { PACKAGE_PIN B8     IOSTANDARD LVCMOS33 } [get_ports { ethRxP}]
 set_property -dict { PACKAGE_PIN A8     IOSTANDARD LVCMOS33 } [get_ports { ethRxN}]
 
+set_property -dict { PACKAGE_PIN P22    IOSTANDARD LVCMOS33 } [get_ports { bootMosi}]
+set_property -dict { PACKAGE_PIN R22    IOSTANDARD LVCMOS33 } [get_ports { bootMiso}]
+set_property -dict { PACKAGE_PIN P21    IOSTANDARD LVCMOS33 } [get_ports { bootWpL}]
+set_property -dict { PACKAGE_PIN R21    IOSTANDARD LVCMOS33 } [get_ports { bootHdL}]
+set_property -dict { PACKAGE_PIN T19    IOSTANDARD LVCMOS33 } [get_ports { bootCsL}]
+
 set_property -dict { PACKAGE_PIN V5     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[8]}]
 set_property -dict { PACKAGE_PIN M6     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[7]}]
 set_property -dict { PACKAGE_PIN L3     IOSTANDARD LVCMOS33 } [get_ports { pProgCsL[6]}]
