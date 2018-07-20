@@ -14,7 +14,7 @@
 -- File       : LsstIonPumpCtrl.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2017-04-20
--- Last update: 2018-04-18
+-- Last update: 2018-06-22
 -------------------------------------------------------------------------------
 -- Description: Firmware Target's Top Level
 -------------------------------------------------------------------------------
@@ -71,6 +71,12 @@ entity LsstIonPumpCtrl is
       ethTxN     : out   sl;
       -- Misc.
       extRstL    : in    sl;
+      -- Boot Memory Ports
+      bootCsL    : out   sl;
+      bootMosi   : out   sl;
+      bootMiso   : in    sl;
+      bootWpL    : out   sl;
+      bootHdL    : out   sl;
       -- XADC Ports
       vPIn       : in    sl;
       vNIn       : in    sl);
@@ -112,6 +118,12 @@ begin
          -- XADC Ports
          vPIn             => vPIn,
          vNIn             => vNIn,
+         -- Boot Memory Ports
+         bootCsL          => bootCsL,
+         bootMosi         => bootMosi,
+         bootMiso         => bootMiso,
+         bootWpL          => bootWpL,
+         bootHdL          => bootHdL,
          -- 1GbE Interface
          ethClkP          => ethClkP,
          ethClkN          => ethClkN,
