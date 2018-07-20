@@ -56,6 +56,7 @@ class Channel(pr.Device):
 
         self.add(pr.RemoteVariable(
             name    = 'CurrentLimit',
+            hidden = True,
             offset  = 0x0,
             mode    = 'WO',
             base = pr.UInt,
@@ -71,8 +72,8 @@ class Channel(pr.Device):
             ))
         
         self.add(pr.RemoteVariable(
+            hidden = True,
             name    = 'VoltageLimit',
-            hidden = False,
             offset  = 0x4,
             mode    = 'WO',
             base = pr.UInt,
@@ -87,6 +88,7 @@ class Channel(pr.Device):
             ))
         
         self.add(pr.RemoteVariable(
+            hidden = True,
             name    = 'PowerLimit',
             offset  = 0x8,
             mode    = 'WO',
@@ -102,11 +104,12 @@ class Channel(pr.Device):
             disp = '{:1.3f}',
             ))
         self.add(pr.RemoteVariable(
+            hidden = True,
             name    = 'CurrentRaw',
             offset  = 0x200,
             mode    = 'RO',
-            base = pr.UInt,
-            bitSize = 24,
+            base = pr.Int,
+            bitSize = 32,
         ))
         self.add(pr.LinkVariable(
             name = 'SupplyCurrent',
@@ -118,6 +121,7 @@ class Channel(pr.Device):
         ))
  
         self.add(pr.RemoteVariable(
+            hidden = True,
             name    = 'VoltageRaw',
             offset  = 0x204,
             mode    = 'RO',
@@ -135,6 +139,7 @@ class Channel(pr.Device):
         ))
  
         self.add(pr.RemoteVariable(
+            hidden = True,
             name    = 'PowerRaw',
             offset  = 0x208,
             mode    = 'RO',
