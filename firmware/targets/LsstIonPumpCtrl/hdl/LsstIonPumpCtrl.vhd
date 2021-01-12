@@ -30,8 +30,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-use work.StdRtlPkg.all;
-use work.AxiLitePkg.all;
+library surf;
+use surf.StdRtlPkg.all;
+use surf.AxiLitePkg.all;
+
+library lsst_pwr_ctrl_core;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -101,7 +104,7 @@ begin
    ---------------------
    -- Common Core Module
    ---------------------
-   U_Core : entity work.LsstPwrCtrlCore
+   U_Core : entity lsst_pwr_ctrl_core.LsstPwrCtrlCore
       generic map (
          TPD_G        => TPD_G,
          BUILD_INFO_G => BUILD_INFO_G)
@@ -135,7 +138,7 @@ begin
    ----------------------------------------
    -- AXI-Lite: Configuration Memory Module
    ----------------------------------------
-   U_I2cProm : entity work.AxiI2cEeprom
+   U_I2cProm : entity surf.AxiI2cEeprom
       generic map (
          TPD_G          => TPD_G,
          ADDR_WIDTH_G   => 13,

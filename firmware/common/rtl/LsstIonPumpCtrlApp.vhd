@@ -34,11 +34,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-use work.StdRtlPkg.all;
-use work.AxiStreamPkg.all;
-use work.AxiLitePkg.all;
-
-
+library surf;
+use surf.StdRtlPkg.all;
+use surf.AxiStreamPkg.all;
+use surf.AxiLitePkg.all;
 
 entity LsstIonPumpCtrlApp is
   generic (
@@ -109,7 +108,7 @@ begin
   ---------------------------
   -- AXI-Lite Crossbar Module
   ---------------------------        
-  U_Xbar : entity work.AxiLiteCrossbar
+  U_Xbar : entity surf.AxiLiteCrossbar
     generic map (
       TPD_G              => TPD_G,
       NUM_SLAVE_SLOTS_G  => 1,
@@ -128,10 +127,9 @@ begin
       mAxiReadSlaves      => LocAxilReadSlaves
       );
 
-  u_StartConv : entity work.Heartbeat
+  u_StartConv : entity surf.Heartbeat
     generic map(
       TPD_G        => 1 ns,
-      USE_DSP48_G  => "no",
       PERIOD_IN_G  => 8.0E-9,           --units of seconds
       PERIOD_OUT_G => 1.0E-0
       )                                 --units of seconds
@@ -142,7 +140,7 @@ begin
       );
 
 
-u_LE : entity work.SynchronizerEdge 
+u_LE : entity surf.SynchronizerEdge 
    generic map (
        BYPASS_SYNC_G  => true  -- Bypass Synchronizer module for synchronous data configuration 
        )      

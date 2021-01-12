@@ -34,9 +34,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-use work.StdRtlPkg.all;
-use work.AxiStreamPkg.all;
-use work.AxiLitePkg.all;
+library surf;
+use surf.StdRtlPkg.all;
+use surf.AxiStreamPkg.all;
+use surf.AxiLitePkg.all;
 
 entity FrontEndBoard is
   generic (
@@ -122,7 +123,7 @@ begin
   ---------------------------
   -- AXI-Lite Crossbar Module
   ---------------------------        
-  U_Xbar : entity work.AxiLiteCrossbar
+  U_Xbar : entity surf.AxiLiteCrossbar
     generic map (
       TPD_G              => TPD_G,
       NUM_SLAVE_SLOTS_G  => 1,
