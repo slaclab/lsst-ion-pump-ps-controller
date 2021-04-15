@@ -93,7 +93,7 @@ architecture rtl of max11202Master is
   constant REG_INIT_C : RegType := (
     state       => IDLE_S,
     syncSdin    => "000",
-    rdData      => (others => x"0000000"),
+    rdData      => (others => (others => '0')),
 	 rdDataA     => (others => '0'),
 	 rdDataB     => (others => '0'),
 	 rdDataC     => (others => '0'),
